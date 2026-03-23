@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') }); // Load environment variables from .env file
 
 const app = express();
 
