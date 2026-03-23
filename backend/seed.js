@@ -25,32 +25,26 @@ const seed = async () => {
   // Insert Users
   const users = await User.insertMany([
     {
-      name: 'Kavindu Perera',
-      email: 'kavindu.perera@students.sliit.lk',
+      name: 'Nimesh Perera',
+      email: 'nimesh.perera@students.sliit.lk',
       password: 'password123',
       role: 'student',
     },
     {
-      name: 'Nimesh Fernando',
-      email: 'nimesh.fernando@students.sliit.lk',
+      name: 'Oshani Fernando',
+      email: 'oshani.fernando@students.sliit.lk',
       password: 'password123',
       role: 'student',
     },
     {
-      name: 'Sanduni Rajapaksha',
-      email: 'sanduni.rajapaksha@students.sliit.lk',
+      name: 'Kulitha Rajapaksha',
+      email: 'kulitha.rajapaksha@students.sliit.lk',
       password: 'password123',
       role: 'student',
     },
     {
-      name: 'Tharindu Wickramasinghe',
-      email: 'tharindu.wickramasinghe@students.sliit.lk',
-      password: 'password123',
-      role: 'student',
-    },
-    {
-      name: 'Dilani Jayawardena',
-      email: 'dilani.jayawardena@students.sliit.lk',
+      name: 'Shwetha Wickramasinghe',
+      email: 'shwetha.wickramasinghe@students.sliit.lk',
       password: 'password123',
       role: 'student',
     },
@@ -139,7 +133,7 @@ const seed = async () => {
       dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
     },
     {
-      student: users[4]._id,
+      student: users[3]._id,
       resource: resources[4]._id,
       status: 'PENDING',
       dueDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
