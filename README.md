@@ -43,18 +43,21 @@ Resora/
 ## Installation
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd Resora
    ```
 
 2. Install backend dependencies:
+
    ```bash
    cd backend
    npm install
    ```
 
 3. Install frontend dependencies:
+
    ```bash
    cd ../frontend
    npm install
@@ -70,9 +73,11 @@ Resora/
 Create a `.env` file in the root directory with the following variables:
 
 ```env
-MONGODB_URI=mongodb+srv://resora_db_user:Resora10@resora.lyisjoj.mongodb.net/
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>/<database>
 PORT=5000
 ```
+
+**Note**: Never commit actual credentials to version control. Keep your `.env` file in `.gitignore`.
 
 ## Running the Application
 
@@ -109,6 +114,7 @@ The frontend will be available at `http://localhost:5173` (default Vite port).
 ### Frontend Scripts
 
 From the `frontend/` directory:
+
 - `npm run dev`: Starts development server (typically on port 5173)
 - `npm run build`: Builds the production-ready app
 - `npm run lint`: Lints the code
@@ -139,9 +145,9 @@ The application connects to MongoDB using Mongoose. The connection string is loa
 To add new API routes, modify `backend/server.js`:
 
 ```javascript
-app.get('/api/new-endpoint', (req, res) => {
+app.get("/api/new-endpoint", (req, res) => {
   // Handle the request
-  res.json({ message: 'New endpoint response' });
+  res.json({ message: "New endpoint response" });
 });
 ```
 
