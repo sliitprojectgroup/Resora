@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import borrowRoutes from './routes/borrowRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,6 +33,9 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({ message: 'Resora API is running!' });
 });
+
+// API Routes
+app.use('/api/requests', borrowRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;

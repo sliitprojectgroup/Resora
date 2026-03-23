@@ -1,0 +1,156 @@
+Perfect 👍 — now you’re doing it the right way.
+
+I’ll give you a **clean, strict prompt** for **CORE APIs (Phase 3)** so AI generates exactly what your team needs.
+
+---
+
+# 🔥 ✅ FINAL PROMPT (CORE APIs)
+
+I am building a MERN stack backend for a project:
+
+Project Name: Resora – Academic Resource Borrowing System
+
+Tech Stack:
+
+* Node.js
+* Express
+* MongoDB (Mongoose)
+* JavaScript (NOT TypeScript)
+
+I already have Mongoose models:
+
+* User
+* Resource
+* BorrowRequest
+
+---
+
+TASK:
+Generate clean backend code for CORE APIs using Express:
+
+1. Create Borrow Request
+   POST /api/requests
+
+2. Get All Requests
+   GET /api/requests
+
+3. Get Pending Requests
+   GET /api/requests?status=PENDING
+
+---
+
+REQUIREMENTS:
+
+1. Project Structure:
+
+* routes/borrowRoutes.js
+* controllers/borrowController.js
+
+---
+
+2. POST /api/requests
+
+* Accept:
+
+  * student (user ID)
+  * resource (resource ID)
+  * dueDate
+* Default status = "PENDING"
+* Save to database
+* Return created request
+
+---
+
+3. GET /api/requests
+
+* Return all borrow requests
+* Populate:
+
+  * student (name, role)
+  * resource (name, status)
+
+---
+
+4. GET /api/requests?status=PENDING
+
+* Filter requests by status
+* If query param exists, filter accordingly
+* Example:
+  /api/requests?status=PENDING
+
+---
+
+5. Code Style:
+
+* Use async/await
+* Use try/catch for error handling
+* Use ES Modules (import/export)
+* Keep code beginner-friendly
+
+---
+
+6. Output:
+
+* Show folder structure
+* Show borrowRoutes.js
+* Show borrowController.js
+* Show how to connect routes in server.js
+* No explanations, only code
+
+---
+
+IMPORTANT:
+
+* Do NOT use TypeScript
+* Do NOT add authentication yet
+* Do NOT add unnecessary complexity
+
+---
+
+# 🧠 Why This Prompt is Strong
+
+It forces AI to:
+
+✔ Use correct structure (routes + controller)
+✔ Follow REST API standards
+✔ Handle filtering properly
+✔ Keep it simple (important for you)
+
+---
+
+# 🎯 What You Do Next
+
+1. Copy this prompt
+2. Paste into ChatGPT / Cursor
+3. Generate code
+4. Add to backend
+
+---
+
+# ⚠️ After You Generate
+
+Check that you have:
+
+```id="txdc2b"
+backend/
+├── routes/
+│   └── borrowRoutes.js
+├── controllers/
+│   └── borrowController.js
+```
+
+---
+
+# 💬 Next Step
+
+After you generate code, send it here.
+
+I’ll:
+
+* fix any errors
+* simplify logic if needed
+* help you test with Postman
+
+---
+
+You’re building the backend properly now 🔥
