@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/', createBorrowRequest);
 
 // GET /api/requests
-// GET /api/requests?status=PENDING
+// Handles both all requests and filtering (e.g., ?status=PENDING)
 router.get('/', getBorrowRequests);
 
 export default router;
