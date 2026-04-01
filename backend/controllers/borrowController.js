@@ -1,4 +1,5 @@
 import BorrowRequest from '../models/BorrowRequest.js';
+import Resource from '../models/Resource.js';
 
 // 1. Create Borrow Request
 // POST /api/requests
@@ -40,5 +41,38 @@ export const getBorrowRequests = async (req, res) => {
     return res.status(200).json(requests);
   } catch (error) {
     return res.status(500).json({ message: 'Error fetching borrow requests', error: error.message });
+  }
+};
+
+// 4. Approve Borrow Request
+// PUT /api/requests/:id/approve
+export const approveRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const request = await BorrowRequest.findById(requestId);
+    
+    if (!request) {
+      return res.status(404).json({ message: 'Borrow request not found' });
+    }
+    
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ message: 'Request is not pending' });
+    }
+    
+    const resource = await Resource.findById(request.resource);
+    
+    if (!resource || resource.status !== 'AVAILABLE') {
+      return res.status(400).json({ message: 'Resource is not available' });
+    }
+    
+    request.status = 'APPROVED';
+    await request.save();
+    
+    resource.status = 'BORROWED';
+    await resource.save();
+    
+    return res.status(200).json({ message: 'Request approved successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error approving request', error: error.message });
   }
 };
