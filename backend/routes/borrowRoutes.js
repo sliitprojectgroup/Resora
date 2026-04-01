@@ -1,10 +1,13 @@
 import express from 'express';
-import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource } from '../controllers/borrowController.js';
+import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource, getOverdueRequests } from '../controllers/borrowController.js';
 
 const router = express.Router();
 
 // POST /api/requests
 router.post('/', createBorrowRequest);
+
+// GET /api/requests/overdue
+router.get('/overdue', getOverdueRequests); // ← ABOVE the general GET
 
 // GET /api/requests
 // Handles both all requests and filtering (e.g., ?status=PENDING)
@@ -18,5 +21,7 @@ router.patch('/:id/reject', rejectRequest);
 
 // PATCH /api/requests/:id/return
 router.patch('/:id/return', returnResource);
+
+
 
 export default router;
