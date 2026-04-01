@@ -1,5 +1,5 @@
 import express from 'express';
-import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest } from '../controllers/borrowController.js';
+import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource } from '../controllers/borrowController.js';
 
 const router = express.Router();
 
@@ -15,5 +15,8 @@ router.patch('/:id/approve', approveRequest);
 
 // PATCH /api/requests/:id/reject
 router.patch('/:id/reject', rejectRequest);
+
+// PATCH /api/requests/:id/return
+router.patch('/:id/return', returnResource);
 
 export default router;

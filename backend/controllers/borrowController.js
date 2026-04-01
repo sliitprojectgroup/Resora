@@ -107,3 +107,34 @@ export const rejectRequest = async (req, res) => {
     return res.status(500).json({ message: 'Error rejecting request', error: error.message });
   }
 };
+
+// 6. Return Resource
+// PATCH /api/requests/:id/return
+export const returnResource = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const request = await BorrowRequest.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Borrow request not found' });
+    }
+
+    if (request.status !== 'APPROVED') {
+      return res.status(400).json({ message: 'Request must be APPROVED to be returned' });
+    }
+
+    request.returnDate = new Date();
+    request.status = 'RETURNED';
+    await request.save();
+
+    const resource = await Resource.findById(request.resource);
+    if (resource) {
+      resource.status = 'AVAILABLE';
+      await resource.save();
+    }
+
+    return res.status(200).json({ message: 'Resource returned successfully', request });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error returning resource', error: error.message });
+  }
+};
