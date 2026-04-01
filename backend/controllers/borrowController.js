@@ -76,3 +76,34 @@ export const approveRequest = async (req, res) => {
     return res.status(500).json({ message: 'Error approving request', error: error.message });
   }
 };
+
+// 5. Reject Borrow Request
+// PATCH /api/requests/:id/reject
+export const rejectRequest = async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const { rejectionReason } = req.body;
+
+    if (!rejectionReason || rejectionReason.trim() === '') {
+      return res.status(400).json({ message: 'Rejection reason is required' });
+    }
+
+    const request = await BorrowRequest.findById(requestId);
+
+    if (!request) {
+      return res.status(404).json({ message: 'Borrow request not found' });
+    }
+
+    if (request.status !== 'PENDING') {
+      return res.status(400).json({ message: 'Request is not pending' });
+    }
+
+    request.status = 'REJECTED';
+    request.rejectionReason = rejectionReason;
+    await request.save();
+
+    return res.status(200).json({ message: 'Request rejected successfully', request });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error rejecting request', error: error.message });
+  }
+};

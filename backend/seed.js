@@ -107,30 +107,12 @@ const seed = async () => {
   const now = new Date();
 
   const borrowRequests = await BorrowRequest.insertMany([
+    // PENDING requests
     {
       student: users[0]._id,
       resource: resources[0]._id,
       status: 'PENDING',
       dueDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-    },
-    {
-      student: users[1]._id,
-      resource: resources[1]._id,
-      status: 'APPROVED',
-      dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
-    },
-    {
-      student: users[2]._id,
-      resource: resources[2]._id,
-      status: 'RETURNED',
-      dueDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
-      returnDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
-    },
-    {
-      student: users[3]._id,
-      resource: resources[3]._id,
-      status: 'APPROVED',
-      dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
     },
     {
       student: users[3]._id,
@@ -139,6 +121,66 @@ const seed = async () => {
       dueDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000),
     },
     {
+      student: users[1]._id,
+      resource: resources[2]._id,
+      status: 'PENDING',
+      dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[2]._id,
+      resource: resources[6]._id,
+      status: 'PENDING',
+      dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[0]._id,
+      resource: resources[3]._id,
+      status: 'PENDING',
+      dueDate: new Date(now.getTime() + 12 * 24 * 60 * 60 * 1000),
+    },
+    // APPROVED requests
+    {
+      student: users[1]._id,
+      resource: resources[1]._id,
+      status: 'APPROVED',
+      dueDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[3]._id,
+      resource: resources[3]._id,
+      status: 'APPROVED',
+      dueDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[2]._id,
+      resource: resources[5]._id,
+      status: 'APPROVED',
+      dueDate: new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000),
+    },
+    // RETURNED requests
+    {
+      student: users[2]._id,
+      resource: resources[2]._id,
+      status: 'RETURNED',
+      dueDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
+      returnDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[0]._id,
+      resource: resources[6]._id,
+      status: 'RETURNED',
+      dueDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+      returnDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+    },
+    {
+      student: users[1]._id,
+      resource: resources[4]._id,
+      status: 'RETURNED',
+      dueDate: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
+      returnDate: new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000),
+    },
+    // REJECTED requests
+    {
       student: users[0]._id,
       resource: resources[5]._id,
       status: 'REJECTED',
@@ -146,11 +188,18 @@ const seed = async () => {
       rejectionReason: 'Camera is reserved for a scheduled department event.',
     },
     {
-      student: users[2]._id,
-      resource: resources[6]._id,
-      status: 'RETURNED',
-      dueDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      returnDate: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
+      student: users[3]._id,
+      resource: resources[1]._id,
+      status: 'REJECTED',
+      dueDate: new Date(now.getTime() + 6 * 24 * 60 * 60 * 1000),
+      rejectionReason: 'Student has outstanding unreturned items.',
+    },
+    {
+      student: users[1]._id,
+      resource: resources[0]._id,
+      status: 'REJECTED',
+      dueDate: new Date(now.getTime() + 4 * 24 * 60 * 60 * 1000),
+      rejectionReason: 'Request submitted after deadline.',
     },
   ]);
   console.log(`Inserted ${borrowRequests.length} borrow requests`);
