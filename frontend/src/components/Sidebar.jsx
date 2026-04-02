@@ -14,6 +14,9 @@ export default function Sidebar() {
       { name: 'Borrowed Items', path: '/borrowed' },
       { name: 'Scan QR', path: '/scan' }
     ] : []),
+    ...(role === 'staff' || role === 'admin' ? [
+      { name: 'System History', path: '/history' }
+    ] : []),
     { name: 'Resources', path: '/resources' },
   ];
 
