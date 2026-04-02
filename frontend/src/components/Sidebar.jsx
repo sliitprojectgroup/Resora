@@ -3,11 +3,15 @@ import { Link, useLocation } from 'react-router-dom';
 export default function Sidebar() {
   const location = useLocation();
   
+  const role = localStorage.getItem('role') || 'staff';
+
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: '/dashboard' },
-    { name: 'Pending Requests', path: '/pending' },
-    { name: 'Overdue Items', path: '/overdue' },
+    { name: 'Dashboard', path: role === 'admin' ? '/admin' : '/dashboard' },
+    ...(role === 'staff' ? [
+      { name: 'Pending Requests', path: '/pending' },
+      { name: 'Overdue Items', path: '/overdue' }
+    ] : []),
     { name: 'Resources', path: '/resources' },
   ];
 

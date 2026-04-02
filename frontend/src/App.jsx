@@ -1,11 +1,20 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './layouts/AdminLayout';
 import StudentLayout from './layouts/StudentLayout';
 import Home from './pages/Home';
 import StaffDashboard from './pages/StaffDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import PendingRequests from './pages/PendingRequests';
 import OverdueList from './pages/OverdueList';
 import StudentDashboard from './pages/StudentDashboard';
+
+function ProtectedRoute({ allowedRoles, children }) {
+  const role = localStorage.getItem('role') || 'staff';
+  if (!allowedRoles.includes(role)) {
+    return <Navigate to="/" />;
+  }
+  return children;
+}
 
 export default function App() {
   return (
@@ -16,9 +25,26 @@ export default function App() {
 
         {/* Admin Flow routes wrapper */}
         <Route element={<AdminLayout />}>
-          <Route path="/dashboard" element={<StaffDashboard />} />
-          <Route path="/pending" element={<PendingRequests />} />
-          <Route path="/overdue" element={<OverdueList />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <StaffDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/pending" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <PendingRequests />
+            </ProtectedRoute>
+          } />
+          <Route path="/overdue" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <OverdueList />
+            </ProtectedRoute>
+          } />
           <Route path="/resources" element={
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center min-h-[400px] flex flex-col items-center justify-center">
               <h2 className="text-xl font-semibold text-gray-800">Resources Library</h2>
@@ -29,7 +55,11 @@ export default function App() {
 
         {/* Student Flow routes wrapper */}
         <Route element={<StudentLayout />}>
-          <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/student-dashboard" element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <StudentDashboard />
+            </ProtectedRoute>
+          } />
           
           {/* Temporary placeholder routes reflecting the StudentSidebar links */}
           <Route path="/browse" element={

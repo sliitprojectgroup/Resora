@@ -18,13 +18,18 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-          <Link to="/student-dashboard">
+          <Link to="/student-dashboard" onClick={() => localStorage.setItem('role', 'student')}>
             <Button variant="primary" className="w-full sm:w-auto text-lg px-8 py-3 shadow-sm hover:shadow">
               Login as Student
             </Button>
           </Link>
-          <Link to="/dashboard">
+          <Link to="/dashboard" onClick={() => localStorage.setItem('role', 'staff')}>
             <Button variant="secondary" className="w-full sm:w-auto text-lg px-8 py-3 bg-white border border-gray-200 shadow-sm hover:shadow">
+              Login as Staff
+            </Button>
+          </Link>
+          <Link to="/admin" onClick={() => localStorage.setItem('role', 'admin')}>
+            <Button variant="secondary" className="w-full sm:w-auto text-lg px-8 py-3 bg-white border border-gray-200 shadow-sm hover:shadow border-blue-200 text-blue-700 hover:bg-blue-50">
               Login as Admin
             </Button>
           </Link>
