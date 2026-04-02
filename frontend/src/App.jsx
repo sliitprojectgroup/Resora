@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLayout from './layouts/AdminLayout';
 import StudentLayout from './layouts/StudentLayout';
 import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
+import StaffDashboard from './pages/StaffDashboard';
 import PendingRequests from './pages/PendingRequests';
 import OverdueList from './pages/OverdueList';
 import StudentDashboard from './pages/StudentDashboard';
@@ -16,7 +16,7 @@ export default function App() {
 
         {/* Admin Flow routes wrapper */}
         <Route element={<AdminLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<StaffDashboard />} />
           <Route path="/pending" element={<PendingRequests />} />
           <Route path="/overdue" element={<OverdueList />} />
           <Route path="/resources" element={
