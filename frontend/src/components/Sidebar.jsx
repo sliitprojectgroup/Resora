@@ -7,7 +7,7 @@ export default function Sidebar() {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Dashboard', path: role === 'admin' ? '/admin' : '/dashboard' },
+    { name: 'Dashboard', path: role === 'admin' ? '/admin/dashboard' : '/staff/dashboard' },
     ...(role === 'staff' ? [
       { name: 'Pending Requests', path: '/pending' },
       { name: 'Overdue Items', path: '/overdue' }

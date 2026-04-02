@@ -5,7 +5,7 @@ export default function StudentSidebar() {
   
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'My Dashboard', path: '/student-dashboard' },
+    { name: 'My Dashboard', path: '/student/dashboard' },
     { name: 'Browse Resources', path: '/browse' },
     { name: 'My Requests', path: '/my-requests' },
   ];
