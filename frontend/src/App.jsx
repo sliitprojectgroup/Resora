@@ -25,12 +25,12 @@ export default function App() {
 
         {/* Admin Flow routes wrapper */}
         <Route element={<AdminLayout />}>
-          <Route path="/dashboard" element={
+          <Route path="/staff/dashboard" element={
             <ProtectedRoute allowedRoles={['staff']}>
               <StaffDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/admin" element={
+          <Route path="/admin/dashboard" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
             </ProtectedRoute>
@@ -55,7 +55,7 @@ export default function App() {
 
         {/* Student Flow routes wrapper */}
         <Route element={<StudentLayout />}>
-          <Route path="/student-dashboard" element={
+          <Route path="/student/dashboard" element={
             <ProtectedRoute allowedRoles={['student']}>
               <StudentDashboard />
             </ProtectedRoute>
