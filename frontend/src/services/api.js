@@ -5,6 +5,7 @@ const api = axios.create({
 });
 
 export const getPendingRequests = () => api.get('/requests?status=PENDING');
+export const getAllRequests = () => api.get('/requests');
 export const getOverdueRequests = () => api.get('/requests/overdue');
 export const approveRequest = (id) => api.patch(`/requests/${id}/approve`);
 export const rejectRequest = (id, rejectionReason) => api.patch(`/requests/${id}/reject`, { rejectionReason });

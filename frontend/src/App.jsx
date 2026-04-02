@@ -9,6 +9,7 @@ import OverdueList from './pages/OverdueList';
 import StudentDashboard from './pages/StudentDashboard';
 import BorrowedItems from './pages/BorrowedItems';
 import QRScanner from './pages/QRScanner';
+import HistoryLog from './pages/HistoryLog';
 
 function ProtectedRoute({ allowedRoles, children }) {
   const role = localStorage.getItem('role') || 'staff';
@@ -48,13 +49,18 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="/borrowed" element={
-            <ProtectedRoute allowedRoles={['staff']}>
+            <ProtectedRoute allowedRoles={['staff', 'admin']}>
               <BorrowedItems />
             </ProtectedRoute>
           } />
           <Route path="/scan" element={
             <ProtectedRoute allowedRoles={['staff']}>
               <QRScanner />
+            </ProtectedRoute>
+          } />
+          <Route path="/history" element={
+            <ProtectedRoute allowedRoles={['staff', 'admin']}>
+              <HistoryLog />
             </ProtectedRoute>
           } />
           <Route path="/resources" element={
