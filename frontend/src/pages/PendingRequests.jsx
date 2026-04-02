@@ -5,6 +5,7 @@ export default function PendingRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState('');
@@ -62,11 +63,26 @@ export default function PendingRequests() {
     }
   };
 
+  const filteredRequests = requests.filter(req => 
+    req.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    req.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    req.resource?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Pending Requests</h2>
-        {error && <span className="text-red-500 font-medium text-sm">{error}</span>}
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Search student or resource..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+          {error && <span className="text-red-500 font-medium text-sm whitespace-nowrap">{error}</span>}
+        </div>
       </div>
       
       {loading ? (
@@ -83,10 +99,11 @@ export default function PendingRequests() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {requests.map((req) => (
+              {filteredRequests.map((req) => (
                 <tr key={req._id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
                     {req.student?.name}
+                    {req.student?.studentId && <span className="block text-xs text-gray-500 font-normal mt-0.5">{req.student.studentId}</span>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {req.resource?.name}
@@ -110,10 +127,10 @@ export default function PendingRequests() {
                   </td>
                 </tr>
               ))}
-              {requests.length === 0 && (
+              {filteredRequests.length === 0 && (
                 <tr>
                   <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
-                    No pending requests found.
+                    No pending requests matched your search.
                   </td>
                 </tr>
               )}

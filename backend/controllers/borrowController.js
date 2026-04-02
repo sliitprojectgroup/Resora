@@ -35,7 +35,7 @@ export const getBorrowRequests = async (req, res) => {
     }
 
     const requests = await BorrowRequest.find(filter)
-      .populate('student', 'name role')
+      .populate('student', 'name role studentId')
       .populate('resource', 'name status');
 
     return res.status(200).json(requests);
@@ -147,11 +147,23 @@ export const getOverdueRequests = async (req, res) => {
       status: 'APPROVED',
       dueDate: { $lt: new Date() }
     })
-    .populate('student', 'name role')
+    .populate('student', 'name role studentId')
     .populate('resource', 'name status');
 
     return res.status(200).json(overdueRequests);
   } catch (error) {
     return res.status(500).json({ message: 'Error fetching overdue requests', error: error.message });
+  }
+};
+
+// 8. Get Borrowed Items
+export const getBorrowedItems = async (req, res) => {
+  try {
+    const requests = await BorrowRequest.find({ status: 'APPROVED' })
+      .populate('student', 'name role studentId')
+      .populate('resource', 'name status');
+    return res.status(200).json(requests);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching borrowed items', error: error.message });
   }
 };

@@ -29,24 +29,28 @@ const seed = async () => {
       email: 'nimesh.perera@students.sliit.lk',
       password: 'password123',
       role: 'student',
+      studentId: 'IT21056',
     },
     {
       name: 'Oshani Fernando',
       email: 'oshani.fernando@students.sliit.lk',
       password: 'password123',
       role: 'student',
+      studentId: 'IT21099',
     },
     {
       name: 'Kulitha Rajapaksha',
       email: 'kulitha.rajapaksha@students.sliit.lk',
       password: 'password123',
       role: 'student',
+      studentId: 'IT21455',
     },
     {
       name: 'Shwetha Wickramasinghe',
       email: 'shwetha.wickramasinghe@students.sliit.lk',
       password: 'password123',
       role: 'student',
+      studentId: 'IT21890',
     },
     {
       name: 'Mr. Ruwan Senanayake',

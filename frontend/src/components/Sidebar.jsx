@@ -10,7 +10,9 @@ export default function Sidebar() {
     { name: 'Dashboard', path: role === 'admin' ? '/admin/dashboard' : '/staff/dashboard' },
     ...(role === 'staff' ? [
       { name: 'Pending Requests', path: '/pending' },
-      { name: 'Overdue Items', path: '/overdue' }
+      { name: 'Overdue Items', path: '/overdue' },
+      { name: 'Borrowed Items', path: '/borrowed' },
+      { name: 'Scan QR', path: '/scan' }
     ] : []),
     { name: 'Resources', path: '/resources' },
   ];

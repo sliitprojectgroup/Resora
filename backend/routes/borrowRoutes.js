@@ -1,5 +1,5 @@
 import express from 'express';
-import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource, getOverdueRequests } from '../controllers/borrowController.js';
+import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource, getOverdueRequests, getBorrowedItems } from '../controllers/borrowController.js';
 
 const router = express.Router();
 
@@ -22,6 +22,8 @@ router.patch('/:id/reject', rejectRequest);
 // PATCH /api/requests/:id/return
 router.patch('/:id/return', returnResource);
 
+// GET /api/requests/borrowed
+router.get('/borrowed', getBorrowedItems);
 
 
 export default router;
