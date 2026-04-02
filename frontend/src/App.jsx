@@ -7,6 +7,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import PendingRequests from './pages/PendingRequests';
 import OverdueList from './pages/OverdueList';
 import StudentDashboard from './pages/StudentDashboard';
+import BorrowedItems from './pages/BorrowedItems';
+import QRScanner from './pages/QRScanner';
 
 function ProtectedRoute({ allowedRoles, children }) {
   const role = localStorage.getItem('role') || 'staff';
@@ -43,6 +45,16 @@ export default function App() {
           <Route path="/overdue" element={
             <ProtectedRoute allowedRoles={['staff']}>
               <OverdueList />
+            </ProtectedRoute>
+          } />
+          <Route path="/borrowed" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <BorrowedItems />
+            </ProtectedRoute>
+          } />
+          <Route path="/scan" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <QRScanner />
             </ProtectedRoute>
           } />
           <Route path="/resources" element={

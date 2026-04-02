@@ -5,6 +5,7 @@ export default function OverdueList() {
   const [overdueItems, setOverdueItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchOverdue = async () => {
     setLoading(true);
@@ -32,11 +33,26 @@ export default function OverdueList() {
     }
   };
 
+  const filteredItems = overdueItems.filter(item => 
+    item.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    item.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.resource?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Overdue Requests</h2>
-        {error && <span className="text-red-500 font-medium text-sm">{error}</span>}
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          <input
+            type="text"
+            placeholder="Search student or resource..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full sm:w-64 px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 outline-none"
+          />
+          {error && <span className="text-red-500 font-medium text-sm whitespace-nowrap">{error}</span>}
+        </div>
       </div>
       
       {loading ? (
@@ -54,12 +70,13 @@ export default function OverdueList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {overdueItems.map((item) => {
+              {filteredItems.map((item) => {
                 const daysOverdue = Math.floor((new Date() - new Date(item.dueDate)) / (1000 * 60 * 60 * 24));
                 return (
                   <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
                       {item.student?.name}
+                      {item.student?.studentId && <span className="block text-xs text-gray-500 font-normal mt-0.5">{item.student.studentId}</span>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {item.resource?.name}
@@ -83,10 +100,10 @@ export default function OverdueList() {
                   </tr>
                 );
               })}
-              {overdueItems.length === 0 && (
+              {filteredItems.length === 0 && (
                 <tr>
                   <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
-                    No overdue items found.
+                    No overdue items matched your search.
                   </td>
                 </tr>
               )}
