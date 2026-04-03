@@ -7,6 +7,11 @@ export default function QRScanner() {
   const [errorMsg, setErrorMsg] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showConditionModal, setShowConditionModal] = useState(false);
+  const [scannedRequestId, setScannedRequestId] = useState('');
+  const [condition, setCondition] = useState('GOOD');
+  const [conditionNotes, setConditionNotes] = useState('');
+  const [scanResult, setScanResult] = useState('');
   
   const scannerRef = useRef(null);
 
@@ -34,30 +39,20 @@ export default function QRScanner() {
           fps: 10,
           qrbox: { width: 250, height: 250 },
         },
-        async (decodedText) => {
+        (decodedText) => {
           // Prevent multiple simultaneous scan triggers
           if (isProcessing) return;
           setIsProcessing(true);
           setErrorMsg(null);
           
-          try {
-            // Pause scanning while waiting for API
-            if (scannerRef.current && scannerRef.current.getState() === 2) { // 2 = SCANNING
-               scannerRef.current.pause();
-            }
-            
-            await returnResource(decodedText);
-            setResult('Return confirmed successfully!');
-            await stopScanner(); // Turn off camera upon success
-          } catch (apiError) {
-            setErrorMsg('Return failed — invalid QR code or server error.');
-            // Resume scanning to allow another try
-            if (scannerRef.current) {
-               scannerRef.current.resume();
-            }
-          } finally {
-            setIsProcessing(false);
+          if (scannerRef.current && scannerRef.current.getState() === 2) { // 2 = SCANNING
+             scannerRef.current.pause();
           }
+          
+          setScannedRequestId(decodedText);
+          setScanResult(`QR Scanned! Request ID: ${decodedText}`);
+          setShowConditionModal(true);
+          setIsProcessing(false);
         },
         (errorMessage) => {
           // Ignore routine background scanning framework warnings
@@ -76,6 +71,36 @@ export default function QRScanner() {
       }
     };
   }, [isCameraActive]);
+
+  const handleConfirmReturn = async () => {
+    try {
+      const response = await returnResource(scannedRequestId, condition, conditionNotes);
+      const { daysLate, penaltyAmount } = response.data;
+      
+      let message = `✅ Return Confirmed!\n`;
+      message += `Device Condition: ${condition}\n`;
+      if (conditionNotes) message += `Notes: ${conditionNotes}\n`;
+      if (penaltyAmount > 0) {
+        message += `⚠️ Returned late!\nDays late: ${daysLate}\nPenalty: LKR ${penaltyAmount}`;
+      } else {
+        message += `No penalty — returned on time.`;
+      }
+      alert(message);
+      
+      setShowConditionModal(false);
+      setScannedRequestId('');
+      setCondition('GOOD');
+      setConditionNotes('');
+      setScanResult('Scan another QR code...');
+      await stopScanner();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Return failed — invalid QR code');
+      setShowConditionModal(false);
+      if (scannerRef.current && scannerRef.current.getState() === 3) { // 3 = PAUSED
+        scannerRef.current.resume();
+      }
+    }
+  };
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center mt-10">
@@ -126,6 +151,93 @@ export default function QRScanner() {
       {errorMsg && (
         <div className="mt-4 p-4 bg-red-50 text-red-700 font-semibold border border-red-200 rounded-md">
           {errorMsg}
+        </div>
+      )}
+
+      {/* Device Condition Modal */}
+      {showConditionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-left">
+            <h3 className="text-lg font-semibold text-gray-900">Device Condition Check</h3>
+            <p className="text-sm text-gray-500 mb-4">QR scanned successfully — please inspect device before confirming</p>
+            
+            <div className="mb-4 text-center">
+              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded border border-gray-200">
+                ID: {scannedRequestId}
+              </span>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <label className="block text-sm font-medium text-gray-700">Select Condition:</label>
+              <div className="grid grid-cols-1 gap-2">
+                <button 
+                  onClick={() => setCondition('GOOD')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'GOOD' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Good
+                  {condition === 'GOOD' && <span className="text-green-500">✓</span>}
+                </button>
+                <button 
+                  onClick={() => setCondition('MINOR DAMAGE')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'MINOR DAMAGE' ? 'bg-yellow-50 border-yellow-500 text-yellow-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Minor Damage
+                  {condition === 'MINOR DAMAGE' && <span className="text-yellow-500">✓</span>}
+                </button>
+                <button 
+                  onClick={() => setCondition('DAMAGED')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'DAMAGED' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Damaged
+                  {condition === 'DAMAGED' && <span className="text-red-500">✓</span>}
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                id="notes"
+                rows="3"
+                className="w-full text-base sm:text-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Details about damage or missing parts..."
+                value={conditionNotes}
+                onChange={(e) => setConditionNotes(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowConditionModal(false);
+                  setScannedRequestId('');
+                  setCondition('GOOD');
+                  setConditionNotes('');
+                  setScanResult('');
+                  if (scannerRef.current && scannerRef.current.getState() === 3) {
+                    scannerRef.current.resume();
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReturn}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                Confirm Return
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

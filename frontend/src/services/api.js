@@ -9,5 +9,6 @@ export const getAllRequests = () => api.get('/requests');
 export const getOverdueRequests = () => api.get('/requests/overdue');
 export const approveRequest = (id) => api.patch(`/requests/${id}/approve`);
 export const rejectRequest = (id, rejectionReason) => api.patch(`/requests/${id}/reject`, { rejectionReason });
-export const returnResource = (id) => api.patch(`/requests/${id}/return`);
+export const returnResource = (id, deviceCondition, returnNotes) => api.patch(`/requests/${id}/return`, { deviceCondition, returnNotes });
 export const getBorrowedItems = () => api.get('/requests/borrowed');
+export const getReturnedRequests = () => api.get('/requests?status=RETURNED');

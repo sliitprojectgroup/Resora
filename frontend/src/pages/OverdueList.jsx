@@ -6,6 +6,10 @@ export default function OverdueList() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showConditionModal, setShowConditionModal] = useState(false);
+  const [selectedReturnId, setSelectedReturnId] = useState('');
+  const [condition, setCondition] = useState('GOOD');
+  const [conditionNotes, setConditionNotes] = useState('');
 
   const fetchOverdue = async () => {
     setLoading(true);
@@ -24,9 +28,33 @@ export default function OverdueList() {
     fetchOverdue();
   }, []);
 
-  const handleReturn = async (id) => {
+  const openConditionModal = (id) => {
+    setSelectedReturnId(id);
+    setShowConditionModal(true);
+  };
+
+  const closeConditionModal = () => {
+    setShowConditionModal(false);
+    setSelectedReturnId('');
+    setCondition('GOOD');
+    setConditionNotes('');
+  };
+
+  const handleReturn = async () => {
     try {
-      await returnResource(id);
+      const response = await returnResource(selectedReturnId, condition, conditionNotes);
+      const { daysLate, penaltyAmount } = response.data;
+      
+      let message = `Device Condition: ${condition}\n`;
+      if (conditionNotes) message += `Notes: ${conditionNotes}\n`;
+      if (penaltyAmount > 0) {
+        message += `⚠️ Returned late!\nDays late: ${daysLate}\nPenalty: LKR ${penaltyAmount}`;
+      } else {
+        message += '✅ Returned on time. No penalty.';
+      }
+      alert(message);
+      
+      closeConditionModal();
       await fetchOverdue();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to return resource');
@@ -65,13 +93,15 @@ export default function OverdueList() {
                 <th className="px-6 py-3 font-medium">Student</th>
                 <th className="px-6 py-3 font-medium">Resource</th>
                 <th className="px-6 py-3 font-medium">Due Date</th>
-                <th className="px-6 py-3 font-medium">Days Overdue</th>
+                <th className="px-6 py-3 font-medium">Days Late</th>
+                <th className="px-6 py-3 font-medium">Penalty (LKR)</th>
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredItems.map((item) => {
-                const daysOverdue = Math.floor((new Date() - new Date(item.dueDate)) / (1000 * 60 * 60 * 24));
+                const daysLate = Math.floor((new Date() - new Date(item.dueDate)) / (1000 * 60 * 60 * 24));
+                const penalty = daysLate * 50;
                 return (
                   <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
@@ -86,12 +116,17 @@ export default function OverdueList() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-800">
-                        {daysOverdue > 0 ? daysOverdue : 0} days
+                        {daysLate > 0 ? daysLate : 0} days
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-red-600 font-semibold">
+                        LKR {penalty > 0 ? penalty : 0}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
-                        onClick={() => handleReturn(item._id)}
+                        onClick={() => openConditionModal(item._id)}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded border border-blue-200 transition-colors font-medium shadow-sm"
                       >
                         Confirm Return
@@ -102,13 +137,90 @@ export default function OverdueList() {
               })}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                     No overdue items matched your search.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {showConditionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-left">
+            <h3 className="text-lg font-semibold text-gray-900">Device Condition Check</h3>
+            <p className="text-sm text-gray-500 mb-4">Please inspect device before confirming return</p>
+            
+            <div className="mb-4 text-center">
+              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded border border-gray-200">
+                ID: {selectedReturnId}
+              </span>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <label className="block text-sm font-medium text-gray-700">Select Condition:</label>
+              <div className="grid grid-cols-1 gap-2">
+                <button 
+                  onClick={() => setCondition('GOOD')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'GOOD' ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Good
+                  {condition === 'GOOD' && <span className="text-green-500">✓</span>}
+                </button>
+                <button 
+                  onClick={() => setCondition('MINOR DAMAGE')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'MINOR DAMAGE' ? 'bg-yellow-50 border-yellow-500 text-yellow-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Minor Damage
+                  {condition === 'MINOR DAMAGE' && <span className="text-yellow-500">✓</span>}
+                </button>
+                <button 
+                  onClick={() => setCondition('DAMAGED')}
+                  className={`px-4 py-2 text-sm font-medium rounded-md border text-left flex items-center justify-between ${
+                    condition === 'DAMAGED' ? 'bg-red-50 border-red-500 text-red-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Damaged
+                  {condition === 'DAMAGED' && <span className="text-red-500">✓</span>}
+                </button>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                Notes (Optional)
+              </label>
+              <textarea
+                id="notes"
+                rows="3"
+                className="w-full text-base sm:text-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="Details about damage or missing parts..."
+                value={conditionNotes}
+                onChange={(e) => setConditionNotes(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={closeConditionModal}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReturn}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              >
+                Confirm Return
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
