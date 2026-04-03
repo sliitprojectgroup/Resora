@@ -107,9 +107,15 @@ export default function HistoryLog() {
                          <span className="text-gray-600 text-xs italic break-words">{item.rejectionReason}</span>
                       </div>
                     ) : item.status === 'RETURNED' && item.returnDate ? (
-                      <span className="text-xs text-green-600 font-medium">
-                        Returned securely on {new Date(item.returnDate).toLocaleDateString()}
-                      </span>
+                      <div className="text-xs text-green-600 font-medium space-y-1">
+                        <div>✓ Returned on {new Date(item.returnDate).toLocaleDateString()}</div>
+                        {item.deviceCondition && (
+                          <div>
+                            Condition: <span className={`font-bold ${item.deviceCondition === 'DAMAGED' ? 'text-red-600' : item.deviceCondition === 'MINOR DAMAGE' ? 'text-yellow-600' : ''}`}>{item.deviceCondition}</span>
+                          </div>
+                        )}
+                        {item.returnNotes && <div className="text-gray-600 italic break-words">"{item.returnNotes}"</div>}
+                      </div>
                     ) : (
                       <span className="text-xs text-gray-400">—</span>
                     )}

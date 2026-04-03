@@ -65,6 +65,11 @@ export const approveRequest = async (req, res) => {
       return res.status(400).json({ message: 'Resource is not available' });
     }
     
+    const now = new Date();
+    
+    // Set due date to exactly 7 days from the moment of approval
+    request.dueDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
     request.status = 'APPROVED';
     await request.save();
     
@@ -113,6 +118,7 @@ export const rejectRequest = async (req, res) => {
 export const returnResource = async (req, res) => {
   try {
     const requestId = req.params.id;
+    const { deviceCondition, returnNotes } = req.body;
     const request = await BorrowRequest.findById(requestId);
 
     if (!request) {
@@ -123,8 +129,29 @@ export const returnResource = async (req, res) => {
       return res.status(400).json({ message: 'Request must be APPROVED to be returned' });
     }
 
-    request.returnDate = new Date();
+    const now = new Date();
+    request.returnDate = now;
     request.status = 'RETURNED';
+    
+    // Save device condition and notes
+    if (deviceCondition) {
+      request.deviceCondition = deviceCondition;
+    }
+    if (returnNotes) {
+      request.returnNotes = returnNotes;
+    }
+
+    if (now > request.dueDate) {
+      const daysLate = Math.floor(
+        (now - request.dueDate) / (1000 * 60 * 60 * 24)
+      );
+      request.daysLate = daysLate;
+      request.penaltyAmount = daysLate * 50;
+    } else {
+      request.daysLate = 0;
+      request.penaltyAmount = 0;
+    }
+    
     await request.save();
 
     const resource = await Resource.findById(request.resource);
@@ -133,7 +160,12 @@ export const returnResource = async (req, res) => {
       await resource.save();
     }
 
-    return res.status(200).json({ message: 'Resource returned successfully', request });
+    return res.status(200).json({ 
+      message: 'Resource returned successfully', 
+      daysLate: request.daysLate,
+      penaltyAmount: request.penaltyAmount,
+      request 
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Error returning resource', error: error.message });
   }

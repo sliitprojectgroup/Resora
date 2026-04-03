@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
-import { getPendingRequests, getOverdueRequests } from '../services/api.js';
+import { getPendingRequests, getOverdueRequests, getReturnedRequests } from '../services/api.js';
 
 export default function StaffDashboard() {
   const navigate = useNavigate();
@@ -9,14 +9,16 @@ export default function StaffDashboard() {
   const [pendingCount, setPendingCount] = useState(0);
   const [overdueCount, setOverdueCount] = useState(0);
   const [recentRequests, setRecentRequests] = useState([]);
+  const [returnedHistory, setReturnedHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [pendingRes, overdueRes] = await Promise.all([
+        const [pendingRes, overdueRes, returnedRes] = await Promise.all([
           getPendingRequests(),
-          getOverdueRequests()
+          getOverdueRequests(),
+          getReturnedRequests()
         ]);
         
         setPendingCount(pendingRes.data.length);
@@ -24,6 +26,7 @@ export default function StaffDashboard() {
         
         // Take up to the last 5 items
         setRecentRequests(pendingRes.data.slice(0, 5));
+        setReturnedHistory(returnedRes.data.slice(0, 5));
       } catch (error) {
         console.error('Failed to load dashboard data', error);
       } finally {
@@ -137,6 +140,50 @@ export default function StaffDashboard() {
               <span className="text-red-600 font-bold text-xl group-hover:translate-x-1 transition-transform">→</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Return History Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
+        <h3 className="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Return History</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm text-gray-500">
+            <thead className="bg-gray-50 text-xs uppercase text-gray-700">
+              <tr>
+                <th className="px-4 py-3 font-medium">Student</th>
+                <th className="px-4 py-3 font-medium">Resource</th>
+                <th className="px-4 py-3 font-medium">Return Date</th>
+                <th className="px-4 py-3 font-medium">Days Late</th>
+                <th className="px-4 py-3 font-medium">Penalty</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {returnedHistory.map((req) => (
+                <tr key={req._id} className="hover:bg-gray-50/50">
+                  <td className="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">{req.student?.name}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{req.resource?.name}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {req.returnDate ? new Date(req.returnDate).toLocaleDateString() : 'N/A'}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">{req.daysLate || 0}</td>
+                  <td className="px-4 py-3 whitespace-nowrap font-medium">
+                    {req.penaltyAmount > 0 ? (
+                      <span className="text-red-600">⚠️ LKR {req.penaltyAmount}</span>
+                    ) : (
+                      <span className="text-green-600">No penalty</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {returnedHistory.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="px-4 py-6 text-center text-gray-400">
+                    No returned items history found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

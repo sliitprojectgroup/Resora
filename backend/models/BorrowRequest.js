@@ -27,6 +27,17 @@ const borrowRequestSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    deviceCondition: {
+      type: String,
+      enum: ['GOOD', 'MINOR DAMAGE', 'DAMAGED'],
+      trim: true,
+    },
+    returnNotes: {
+      type: String,
+      trim: true,
+    },
+    penaltyAmount: { type: Number, default: 0 },
+    daysLate: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
