@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { returnResource } from '../services/api.js';
+import { returnResource, getRequestById } from '../services/api.js';
 
 export default function QRScanner() {
   const [result, setResult] = useState(null);
@@ -9,6 +9,7 @@ export default function QRScanner() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConditionModal, setShowConditionModal] = useState(false);
   const [scannedRequestId, setScannedRequestId] = useState('');
+  const [scannedRequest, setScannedRequest] = useState(null);  // full request data
   const [condition, setCondition] = useState('GOOD');
   const [conditionNotes, setConditionNotes] = useState('');
   const [scanResult, setScanResult] = useState('');
@@ -51,8 +52,19 @@ export default function QRScanner() {
           
           setScannedRequestId(decodedText);
           setScanResult(`QR Scanned! Request ID: ${decodedText}`);
-          setShowConditionModal(true);
-          setIsProcessing(false);
+
+          // Fetch full request to check overdue status
+          getRequestById(decodedText)
+            .then((res) => {
+              setScannedRequest(res.data);
+            })
+            .catch(() => {
+              setScannedRequest(null);
+            })
+            .finally(() => {
+              setShowConditionModal(true);
+              setIsProcessing(false);
+            });
         },
         (errorMessage) => {
           // Ignore routine background scanning framework warnings
@@ -89,6 +101,7 @@ export default function QRScanner() {
       
       setShowConditionModal(false);
       setScannedRequestId('');
+      setScannedRequest(null);
       setCondition('GOOD');
       setConditionNotes('');
       setScanResult('Scan another QR code...');
@@ -155,17 +168,47 @@ export default function QRScanner() {
       )}
 
       {/* Device Condition Modal */}
-      {showConditionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-left">
-            <h3 className="text-lg font-semibold text-gray-900">Device Condition Check</h3>
-            <p className="text-sm text-gray-500 mb-4">QR scanned successfully — please inspect device before confirming</p>
-            
-            <div className="mb-4 text-center">
-              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded border border-gray-200">
-                ID: {scannedRequestId}
-              </span>
-            </div>
+      {showConditionModal && (() => {
+        const now = new Date();
+        const isOverdue = scannedRequest?.dueDate && now > new Date(scannedRequest.dueDate);
+        const daysLate = isOverdue
+          ? Math.floor((now - new Date(scannedRequest.dueDate)) / (1000 * 60 * 60 * 24))
+          : 0;
+        const estimatedPenalty = daysLate * 50;
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 text-left">
+              <h3 className={`text-lg font-semibold mb-1 ${
+                isOverdue ? 'text-red-700' : 'text-gray-900'
+              }`}>Device Condition Check</h3>
+              <p className="text-sm text-gray-500 mb-4">QR scanned successfully — please inspect device before confirming</p>
+
+              {/* Overdue alert banner */}
+              {isOverdue && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-red-600 font-bold text-sm">⚠️ OVERDUE ITEM</span>
+                  </div>
+                  <div className="text-sm text-red-700">
+                    <span className="font-medium">{scannedRequest?.student?.name}</span>
+                    {scannedRequest?.student?.studentId && (
+                      <span className="text-red-500 ml-1">({scannedRequest.student.studentId})</span>
+                    )}
+                  </div>
+                  <div className="mt-1 text-xs text-red-600 space-y-0.5">
+                    <div>Resource: <span className="font-medium">{scannedRequest?.resource?.name}</span></div>
+                    <div>Due: <span className="font-medium">{new Date(scannedRequest.dueDate).toLocaleDateString()}</span></div>
+                    <div className="font-semibold">Days late: {daysLate} &nbsp;|&nbsp; Estimated penalty: LKR {estimatedPenalty}</div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="mb-4 text-center">
+                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded border border-gray-200">
+                  ID: {scannedRequestId}
+                </span>
+              </div>
 
             <div className="space-y-3 mb-6">
               <label className="block text-sm font-medium text-gray-700">Select Condition:</label>
@@ -214,32 +257,38 @@ export default function QRScanner() {
               />
             </div>
             
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowConditionModal(false);
-                  setScannedRequestId('');
-                  setCondition('GOOD');
-                  setConditionNotes('');
-                  setScanResult('');
-                  if (scannerRef.current && scannerRef.current.getState() === 3) {
-                    scannerRef.current.resume();
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirmReturn}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              >
-                Confirm Return
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => {
+                    setShowConditionModal(false);
+                    setScannedRequestId('');
+                    setScannedRequest(null);
+                    setCondition('GOOD');
+                    setConditionNotes('');
+                    setScanResult('');
+                    if (scannerRef.current && scannerRef.current.getState() === 3) {
+                      scannerRef.current.resume();
+                    }
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmReturn}
+                  className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 transition-colors ${
+                    isOverdue
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                      : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                  }`}
+                >
+                  Confirm Return
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

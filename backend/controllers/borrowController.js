@@ -199,3 +199,21 @@ export const getBorrowedItems = async (req, res) => {
     return res.status(500).json({ message: 'Error fetching borrowed items', error: error.message });
   }
 };
+
+// 9. Get Single Request by ID (used by QR scanner to check overdue status)
+// GET /api/requests/:id
+export const getRequestById = async (req, res) => {
+  try {
+    const request = await BorrowRequest.findById(req.params.id)
+      .populate('student', 'name role studentId')
+      .populate('resource', 'name status');
+
+    if (!request) {
+      return res.status(404).json({ message: 'Borrow request not found' });
+    }
+
+    return res.status(200).json(request);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error fetching request', error: error.message });
+  }
+};

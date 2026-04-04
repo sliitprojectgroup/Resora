@@ -1,13 +1,16 @@
 import express from 'express';
-import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource, getOverdueRequests, getBorrowedItems } from '../controllers/borrowController.js';
+import { createBorrowRequest, getBorrowRequests, approveRequest, rejectRequest, returnResource, getOverdueRequests, getBorrowedItems, getRequestById } from '../controllers/borrowController.js';
 
 const router = express.Router();
 
 // POST /api/requests
 router.post('/', createBorrowRequest);
 
-// GET /api/requests/overdue
-router.get('/overdue', getOverdueRequests); // ← ABOVE the general GET
+// GET /api/requests/overdue  ← MUST be before /:id
+router.get('/overdue', getOverdueRequests);
+
+// GET /api/requests/borrowed  ← MUST be before /:id
+router.get('/borrowed', getBorrowedItems);
 
 // GET /api/requests
 // Handles both all requests and filtering (e.g., ?status=PENDING)
@@ -22,8 +25,8 @@ router.patch('/:id/reject', rejectRequest);
 // PATCH /api/requests/:id/return
 router.patch('/:id/return', returnResource);
 
-// GET /api/requests/borrowed
-router.get('/borrowed', getBorrowedItems);
+// GET /api/requests/:id  ← MUST be last — catches any /:id
+router.get('/:id', getRequestById);
 
 
 export default router;
