@@ -96,6 +96,7 @@ export default function BorrowedItems() {
               <th className="px-4 py-3 font-medium">Student</th>
               <th className="px-4 py-3 font-medium">Resource</th>
               <th className="px-4 py-3 font-medium">Due Date</th>
+              <th className="px-4 py-3 font-medium">Overdue Penalty</th>
               <th className="px-4 py-3 font-medium text-center">QR Code</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
@@ -103,38 +104,83 @@ export default function BorrowedItems() {
           <tbody className="divide-y divide-gray-100">
             {filteredItems.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-4 py-8 text-center text-gray-400 font-medium">
+                <td colSpan="6" className="px-4 py-8 text-center text-gray-400 font-medium">
                   No borrowed items matched your search.
                 </td>
               </tr>
             ) : (
-              filteredItems.map((item) => (
-                <tr key={item._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-4 whitespace-nowrap text-gray-900 font-medium">
-                    {item.student?.name}
-                    {item.student?.studentId && <span className="block text-xs text-gray-500 font-normal mt-0.5">{item.student.studentId}</span>}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    {item.resource?.name}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    {item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-center flex justify-center">
-                    <div className="inline-block p-2 bg-white border border-gray-200 rounded">
-                      <QRCodeSVG value={item._id} size={128} />
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap text-right">
-                    <button
-                      onClick={() => openConditionModal(item._id)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
-                    >
-                      Confirm Return
-                    </button>
-                  </td>
-                </tr>
-              ))
+              filteredItems.map((item) => {
+                const now = new Date();
+                const isOverdue = item.dueDate && now > new Date(item.dueDate);
+                const daysLate = isOverdue
+                  ? Math.floor((now - new Date(item.dueDate)) / (1000 * 60 * 60 * 24))
+                  : 0;
+                const estimatedPenalty = daysLate * 50;
+
+                return (
+                  <tr
+                    key={item._id}
+                    className={`transition-colors ${
+                      isOverdue ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <td className="px-4 py-4 whitespace-nowrap font-medium">
+                      <span className={isOverdue ? 'text-red-800' : 'text-gray-900'}>
+                        {item.student?.name}
+                      </span>
+                      {item.student?.studentId && (
+                        <span className="block text-xs text-gray-500 font-normal mt-0.5">
+                          {item.student.studentId}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-gray-600">
+                      {item.resource?.name}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      {item.dueDate ? (
+                        <div className="flex flex-col gap-1">
+                          <span className={isOverdue ? 'text-red-700 font-medium' : 'text-gray-600'}>
+                            {new Date(item.dueDate).toLocaleDateString()}
+                          </span>
+                          {isOverdue && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-200 w-fit">
+                              ⚠️ OVERDUE {daysLate}d
+                            </span>
+                          )}
+                        </div>
+                      ) : 'N/A'}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      {isOverdue ? (
+                        <div className="flex flex-col">
+                          <span className="text-red-700 font-bold text-sm">⚠️ LKR {estimatedPenalty}</span>
+                          <span className="text-red-400 text-xs">{daysLate} day{daysLate !== 1 ? 's' : ''} late</span>
+                        </div>
+                      ) : (
+                        <span className="text-green-600 text-sm font-medium">✅ On time</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-center flex justify-center">
+                      <div className="inline-block p-2 bg-white border border-gray-200 rounded">
+                        <QRCodeSVG value={item._id} size={128} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-right">
+                      <button
+                        onClick={() => openConditionModal(item._id)}
+                        className={`px-4 py-2 text-white text-sm font-medium rounded-md transition-colors shadow-sm ${
+                          isOverdue
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
+                      >
+                        Confirm Return
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

@@ -12,3 +12,4 @@ export const rejectRequest = (id, rejectionReason) => api.patch(`/requests/${id}
 export const returnResource = (id, deviceCondition, returnNotes) => api.patch(`/requests/${id}/return`, { deviceCondition, returnNotes });
 export const getBorrowedItems = () => api.get('/requests/borrowed');
 export const getReturnedRequests = () => api.get('/requests?status=RETURNED');
+export const getRequestById = (id) => api.get(`/requests/${id}`);
