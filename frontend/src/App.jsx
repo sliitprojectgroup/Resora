@@ -2,6 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import AdminLayout from './layouts/AdminLayout';
 import StudentLayout from './layouts/StudentLayout';
 import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ManageUsers from './pages/ManageUsers';
+import Reports from './pages/Reports';
 import StaffDashboard from './pages/StaffDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import PendingRequests from './pages/PendingRequests';
@@ -25,17 +29,39 @@ export default function App() {
       <Routes>
         {/* Public Landing Page */}
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
         {/* Admin Flow routes wrapper */}
         <Route element={<AdminLayout />}>
+          <Route path="/staff" element={
+            <ProtectedRoute allowedRoles={['staff']}>
+              <StaffDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/staff/dashboard" element={
             <ProtectedRoute allowedRoles={['staff']}>
               <StaffDashboard />
             </ProtectedRoute>
           } />
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/dashboard" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/users" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ManageUsers />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/reports" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <Reports />
             </ProtectedRoute>
           } />
           <Route path="/pending" element={
@@ -73,6 +99,11 @@ export default function App() {
 
         {/* Student Flow routes wrapper */}
         <Route element={<StudentLayout />}>
+          <Route path="/student" element={
+            <ProtectedRoute allowedRoles={['student']}>
+              <StudentDashboard />
+            </ProtectedRoute>
+          } />
           <Route path="/student/dashboard" element={
             <ProtectedRoute allowedRoles={['student']}>
               <StudentDashboard />

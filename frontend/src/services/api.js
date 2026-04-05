@@ -13,3 +13,6 @@ export const returnResource = (id, deviceCondition, returnNotes) => api.patch(`/
 export const getBorrowedItems = () => api.get('/requests/borrowed');
 export const getReturnedRequests = () => api.get('/requests?status=RETURNED');
 export const getRequestById = (id) => api.get(`/requests/${id}`);
+
+export const login = (email, password) => api.post('/auth/login', { email, password });
+export const signup = (fullName, email, password) => api.post('/auth/signup', { fullName, email, password });

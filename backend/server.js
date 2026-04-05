@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import borrowRoutes from './routes/borrowRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import './models/User.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,7 @@ app.get('/', (req, res) => {
 
 // API Routes
 app.use('/api/requests', borrowRoutes);
+app.use('/api/auth', authRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
