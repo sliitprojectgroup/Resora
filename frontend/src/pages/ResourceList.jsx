@@ -3,6 +3,8 @@ import { getResources } from '../services/api';
 import RequestForm from '../components/RequestForm';
 import StatusBadge from '../components/StatusBadge';
 
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80';
+
 export default function ResourceList() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,16 @@ export default function ResourceList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resources.map(resource => (
             <div key={resource._id} className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+              <div className="mb-4">
+                <img
+                  src={resource.image || PLACEHOLDER_IMAGE}
+                  alt={resource.name}
+                  className="w-full h-44 rounded-md object-contain bg-gray-50 p-2 border border-gray-200"
+                  onError={(e) => {
+                    e.currentTarget.src = PLACEHOLDER_IMAGE;
+                  }}
+                />
+              </div>
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-gray-800 truncate" title={resource.name}>
                   {resource.name}

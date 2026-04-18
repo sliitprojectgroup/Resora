@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "populate-images": "node scripts/populateResourceImages.js"
   },
   "keywords": [],
   "author": "",

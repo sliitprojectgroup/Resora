@@ -13,12 +13,14 @@ export const getResources = async (req, res) => {
 // Create a new resource
 export const createResource = async (req, res) => {
   try {
-    const { name, category, deviceCode } = req.body;
+    const { name, category, deviceCode, image } = req.body;
 
     const newResource = new Resource({
       name,
       category,
-      deviceCode: deviceCode || undefined // To avoid empty string violating unique sparse index
+      status: 'AVAILABLE',
+      deviceCode: deviceCode?.trim() ? deviceCode.trim() : undefined, // To avoid empty string violating unique sparse index
+      image: image?.trim() ? image.trim() : undefined
     });
 
     const savedResource = await newResource.save();
@@ -32,7 +34,11 @@ export const createResource = async (req, res) => {
 export const updateResource = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, deviceCode } = req.body;
+    const { name, category, deviceCode, image } = req.body;
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'status')) {
+      return res.status(400).json({ message: 'Manual status updates are not allowed' });
+    }
 
     const resource = await Resource.findById(id);
 
@@ -44,9 +50,21 @@ export const updateResource = async (req, res) => {
       return res.status(400).json({ message: 'Cannot update a borrowed resource' });
     }
 
-    resource.name = name || resource.name;
-    resource.category = category || resource.category;
-    resource.deviceCode = deviceCode || resource.deviceCode;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'name')) {
+      resource.name = name;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'category')) {
+      resource.category = category;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'deviceCode')) {
+      resource.deviceCode = deviceCode?.trim() ? deviceCode.trim() : undefined;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(req.body, 'image')) {
+      resource.image = image?.trim() ? image.trim() : undefined;
+    }
 
     const updatedResource = await resource.save();
     res.status(200).json(updatedResource);

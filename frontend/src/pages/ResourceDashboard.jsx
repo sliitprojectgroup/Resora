@@ -4,6 +4,8 @@ import AddResourceForm from '../components/AddResourceForm';
 import EditResource from '../components/EditResource';
 import StatusBadge from '../components/StatusBadge';
 
+const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80';
+
 export default function ResourceDashboard() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,6 +105,7 @@ export default function ResourceDashboard() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">Image</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Name</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Category</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Device Code</th>
@@ -113,6 +116,16 @@ export default function ResourceDashboard() {
               <tbody className="divide-y divide-gray-200">
                 {resources.map(resource => (
                   <tr key={resource._id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
+                        src={resource.image || PLACEHOLDER_IMAGE}
+                        alt={resource.name}
+                        className="w-12 h-12 rounded object-cover border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = PLACEHOLDER_IMAGE;
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-800 font-medium whitespace-nowrap">
                       {resource.name}
                     </td>

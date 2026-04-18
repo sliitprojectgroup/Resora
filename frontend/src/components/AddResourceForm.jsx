@@ -1,11 +1,25 @@
 import { useState } from 'react';
 import { addResource } from '../services/api';
 
+const RESOURCE_CATEGORIES = [
+  'Laptop',
+  'Desktop',
+  'Projector',
+  'Monitor',
+  'Printer',
+  'Tablet',
+  'Networking',
+  'Accessory',
+  'Software',
+  'Other'
+];
+
 export default function AddResourceForm({ onSuccess, onCancel }) {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    deviceCode: ''
+    deviceCode: '',
+    image: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -60,15 +74,20 @@ export default function AddResourceForm({ onSuccess, onCancel }) {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-          <input
-            type="text"
+          <select
             name="category"
             value={formData.category}
             onChange={handleChange}
-            placeholder="E.g., Laptops"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
             disabled={loading}
-          />
+          >
+            <option value="">Select a category</option>
+            {RESOURCE_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -79,6 +98,19 @@ export default function AddResourceForm({ onSuccess, onCancel }) {
             value={formData.deviceCode}
             onChange={handleChange}
             placeholder="Unique identifier (optional)"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            disabled={loading}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+          <input
+            type="text"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            placeholder="https://example.com/device-image.jpg"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
             disabled={loading}
           />
