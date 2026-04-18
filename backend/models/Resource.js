@@ -17,6 +17,16 @@ const resourceSchema = new mongoose.Schema(
       enum: ['AVAILABLE', 'BORROWED'],
       default: 'AVAILABLE',
     },
+    deviceCode: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true // Allows multiple null/undefined values if some resources don't have codes
+    },
+    image: {
+      type: String,
+      trim: true
+    }
   },
   { timestamps: true }
 );

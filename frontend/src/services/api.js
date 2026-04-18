@@ -20,3 +20,12 @@ export const signup = (fullName, email, password) => api.post('/auth/signup', { 
 export const getAllUsers = () => api.get('/users');
 export const addUser = (fullName, email, password, role) => api.post('/users', { fullName, email, password, role });
 export const deactivateUser = (id) => api.patch(`/users/${id}/deactivate`);
+
+// Added for Student Module
+export const getResources = () => api.get('/resources');
+export const createRequest = (requestData) => api.post('/requests', requestData);
+
+// Added for Resource Management Module
+export const addResource = (data) => api.post('/resources', data);
+export const updateResource = (id, data) => api.put(`/resources/${id}`, data);
+export const deleteResource = (id) => api.delete(`/resources/${id}`);

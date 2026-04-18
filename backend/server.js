@@ -7,6 +7,7 @@ import { dirname, resolve } from 'path';
 import borrowRoutes from './routes/borrowRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import resourceRoutes from './routes/resourceRoutes.js';
 import './models/User.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -41,6 +42,7 @@ app.get('/', (req, res) => {
 app.use('/api/requests', borrowRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/resources', resourceRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;

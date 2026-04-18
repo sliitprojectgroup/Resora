@@ -14,6 +14,9 @@ import StudentDashboard from './pages/StudentDashboard';
 import BorrowedItems from './pages/BorrowedItems';
 import QRScanner from './pages/QRScanner';
 import HistoryLog from './pages/HistoryLog';
+import ResourceList from './pages/ResourceList';
+import MyRequests from './pages/MyRequests';
+import ResourceDashboard from './pages/ResourceDashboard';
 
 function ProtectedRoute({ allowedRoles, children }) {
   const role = localStorage.getItem('role') || 'staff';
@@ -90,10 +93,9 @@ export default function App() {
             </ProtectedRoute>
           } />
           <Route path="/resources" element={
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center min-h-[400px] flex flex-col items-center justify-center">
-              <h2 className="text-xl font-semibold text-gray-800">Resources Library</h2>
-              <p className="text-gray-500 mt-2 max-w-md mx-auto">Placeholder component for the Resources module.</p>
-            </div>
+            <ProtectedRoute allowedRoles={['staff', 'admin']}>
+              <ResourceDashboard />
+            </ProtectedRoute>
           } />
         </Route>
 
@@ -110,19 +112,17 @@ export default function App() {
             </ProtectedRoute>
           } />
           
-          {/* Temporary placeholder routes reflecting the StudentSidebar links */}
+          {/* Student Flow routes */}
           <Route path="/browse" element={
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center min-h-[400px] flex flex-col items-center justify-center">
-              <h2 className="text-xl font-semibold text-gray-800">Browse Resources</h2>
-              <p className="text-gray-500 mt-2 max-w-md mx-auto">Placeholder component for browsing and filtering available resources.</p>
-            </div>
+            <ProtectedRoute allowedRoles={['student']}>
+              <ResourceList />
+            </ProtectedRoute>
           } />
           
           <Route path="/my-requests" element={
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center min-h-[400px] flex flex-col items-center justify-center">
-              <h2 className="text-xl font-semibold text-gray-800">My Requests</h2>
-              <p className="text-gray-500 mt-2 max-w-md mx-auto">Detailed view of the student's personal borrow request history.</p>
-            </div>
+            <ProtectedRoute allowedRoles={['student']}>
+              <MyRequests />
+            </ProtectedRoute>
           } />
         </Route>
 
