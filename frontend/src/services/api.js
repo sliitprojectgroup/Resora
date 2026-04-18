@@ -16,3 +16,7 @@ export const getRequestById = (id) => api.get(`/requests/${id}`);
 
 export const login = (email, password) => api.post('/auth/login', { email, password });
 export const signup = (fullName, email, password) => api.post('/auth/signup', { fullName, email, password });
+
+export const getAllUsers = () => api.get('/users');
+export const addUser = (fullName, email, password, role) => api.post('/users', { fullName, email, password, role });
+export const deactivateUser = (id) => api.patch(`/users/${id}/deactivate`);

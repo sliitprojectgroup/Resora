@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getAllUsers, addUser, deactivateUser } from '../services/api';
 
 export default function ManageUsers() {
   const [formData, setFormData] = useState({
@@ -7,32 +8,57 @@ export default function ManageUsers() {
     password: '',
     role: 'student'
   });
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const users = [
-    { name: 'Shwetha Wickramasinghe', email: 'shwetha@resora.lk', role: 'student' },
-    { name: 'Kulitha Rajapaksha', email: 'kulitha@resora.lk', role: 'student' },
-    { name: 'Kasun Silva', email: 'kasun@resora.lk', role: 'student' },
-    { name: 'Dilini Jayawardena', email: 'dilini@resora.lk', role: 'student' },
-    { name: 'Ravindu Bandara', email: 'ravindu@resora.lk', role: 'student' },
-    { name: 'Tharushi Mendis', email: 'tharushi@resora.lk', role: 'student' },
-    { name: 'Chamod Dissanayake', email: 'chamod@resora.lk', role: 'student' },
-    { name: 'Sanduni Wijesinghe', email: 'sanduni@resora.lk', role: 'student' },
-    { name: 'Isuru Gamage', email: 'isuru@resora.lk', role: 'student' },
-    { name: 'Nethmi Perera', email: 'nethmi@resora.lk', role: 'student' },
-    { name: 'Nimesh Perera', email: 'nimesh@resora.lk', role: 'staff' },
-    { name: 'Oshani Fernando', email: 'oshani@resora.lk', role: 'admin' }
-  ];
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await getAllUsers();
+      setUsers(response.data);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAddUser = () => {
-    console.log('add user', formData);
+  const handleAddUser = async () => {
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      await addUser(formData.fullName, formData.email, formData.password, formData.role);
+      setSuccess('User added successfully!');
+      setFormData({ fullName: '', email: '', password: '', role: 'student' });
+      fetchUsers();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to add user');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeactivate = (user) => {
-    console.log('deactivate', user);
+  const handleDeactivate = async (user) => {
+    if (!confirm(`Are you sure you want to deactivate ${user.name}?`)) {
+      return;
+    }
+
+    try {
+      await deactivateUser(user._id);
+      setSuccess('User deactivated successfully!');
+      fetchUsers();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to deactivate user');
+    }
   };
 
   const getRoleBadgeColor = (role) => {
@@ -44,6 +70,18 @@ export default function ManageUsers() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">User Management</h1>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+          {success}
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New User</h2>
@@ -101,9 +139,10 @@ export default function ManageUsers() {
 
         <button
           onClick={handleAddUser}
-          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          disabled={loading}
+          className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-400"
         >
-          Add User
+          {loading ? 'Adding...' : 'Add User'}
         </button>
       </div>
 
@@ -121,8 +160,8 @@ export default function ManageUsers() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
-                <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+              {users.map((user) => (
+                <tr key={user._id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4 text-gray-800">{user.name}</td>
                   <td className="py-3 px-4 text-gray-600">{user.email}</td>
                   <td className="py-3 px-4">
