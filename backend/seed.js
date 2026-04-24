@@ -37,7 +37,7 @@ const seed = async () => {
     { name: 'Sanduni Wijesinghe', email: 'sanduni@resora.lk', password: '123', role: 'student', studentId: 'IT21901' },
     { name: 'Isuru Gamage', email: 'isuru@resora.lk', password: '123', role: 'student', studentId: 'IT21123' },
     { name: 'Nethmi Perera', email: 'nethmi@resora.lk', password: '123', role: 'student', studentId: 'IT21456' },
-    { name: 'Nimesh Perera', email: 'nimesh@resora.lk', password: '123', role: 'staff' },
+    { name: 'Nimesh Alwis', email: 'nimesh@resora.lk', password: '123', role: 'staff' },
     { name: 'Oshani Fernando', email: 'oshani@resora.lk', password: '123', role: 'admin' },
   ]);
 

@@ -1,189 +1,112 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Card from '../components/Card';
-import { getPendingRequests, getOverdueRequests, getReturnedRequests } from '../services/api.js';
+import React, { useState, useEffect } from 'react';
+import { getAllRequests, getOverdueRequests } from '../services/api.js';
+import StatsCard from '../components/dashboard/StatsCard';
+import RecentRequests from '../components/dashboard/RecentRequests';
+import OverdueSection from '../components/dashboard/OverdueSection';
 
 export default function StaffDashboard() {
-  const navigate = useNavigate();
-  
-  const [pendingCount, setPendingCount] = useState(0);
-  const [overdueCount, setOverdueCount] = useState(0);
-  const [recentRequests, setRecentRequests] = useState([]);
-  const [returnedHistory, setReturnedHistory] = useState([]);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0,
+    returned: 0,
+    overdue: 0,
+  });
+  const [allRequests, setAllRequests] = useState([]);
+  const [overdueRequests, setOverdueRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const userName = localStorage.getItem('userName') || 'Staff Member';
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [pendingRes, overdueRes, returnedRes] = await Promise.all([
-          getPendingRequests(),
-          getOverdueRequests(),
-          getReturnedRequests()
+        setLoading(true);
+        // Fetch all requests and overdue requests concurrently
+        const [allRes, overdueRes] = await Promise.all([
+          getAllRequests(),
+          getOverdueRequests()
         ]);
+
+        const requests = allRes.data || [];
+        const overdues = overdueRes.data || [];
+
+        // Calculate statistics
+        const summary = requests.reduce(
+          (acc, req) => {
+            if (req.status === 'PENDING') acc.pending++;
+            else if (req.status === 'APPROVED') acc.approved++;
+            else if (req.status === 'REJECTED') acc.rejected++;
+            else if (req.status === 'RETURNED') acc.returned++;
+            return acc;
+          },
+          { pending: 0, approved: 0, rejected: 0, returned: 0 }
+        );
+
+        setStats({
+          total: requests.length,
+          pending: summary.pending,
+          approved: summary.approved,
+          rejected: summary.rejected,
+          returned: summary.returned,
+          overdue: overdues.length
+        });
+
+        // Store all requests for filtering
+        const sortedRequests = [...requests].sort((a, b) => new Date(b.createdAt || b.updatedAt || 0) - new Date(a.createdAt || a.updatedAt || 0));
+        setAllRequests(sortedRequests);
         
-        setPendingCount(pendingRes.data.length);
-        setOverdueCount(overdueRes.data.length);
-        
-        // Take up to the last 5 items
-        setRecentRequests(pendingRes.data.slice(0, 5));
-        setReturnedHistory(returnedRes.data.slice(0, 5));
+        // Get most urgent overdue items
+        const sortedOverdues = [...overdues].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+        setOverdueRequests(sortedOverdues.slice(0, 5));
+
       } catch (error) {
-        console.error('Failed to load dashboard data', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchDashboardData();
   }, []);
 
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-lg font-medium text-gray-500">Loading Dashboard...</div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+        <div className="text-lg font-medium text-gray-500">Loading Staff Dashboard...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome to Resora Dashboard</h1>
-        <p className="text-gray-500 mt-2">Your central hub for monitoring system activities and resource requests.</p>
-      </div>
-
-      {/* Grid layout for stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card 
-          title="Total Requests" 
-          value="1,284" 
-        />
-        <Card 
-          title="Pending Requests" 
-          value={pendingCount} 
-          className="ring-1 ring-yellow-400/50"
-        />
-        <Card 
-          title="Overdue Items" 
-          value={overdueCount} 
-          className="ring-1 ring-red-400/50"
-        />
-      </div>
-
-      {/* Section replacements */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[300px]">
-          <h3 className="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Recent Requests</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-500">
-              <thead className="bg-gray-50 text-xs uppercase text-gray-700">
-                <tr>
-                  <th className="px-4 py-2 font-medium">Student</th>
-                  <th className="px-4 py-2 font-medium">Resource</th>
-                  <th className="px-4 py-2 font-medium">Due Date</th>
-                  <th className="px-4 py-2 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {recentRequests.map((req) => (
-                  <tr key={req._id} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">
-                      {req.student?.name}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {req.resource?.name}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {req.dueDate ? new Date(req.dueDate).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
-                         {req.status}
-                       </span>
-                    </td>
-                  </tr>
-                ))}
-                {recentRequests.length === 0 && (
-                  <tr>
-                    <td colSpan="4" className="px-4 py-6 text-center text-gray-400">
-                      No recent requests found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 min-h-[300px]">
-          <h3 className="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Quick Actions</h3>
-          <div className="flex flex-col gap-4">
-            <button 
-              onClick={() => navigate('/pending')}
-              className="w-full flex items-center justify-between p-4 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg transition-colors group"
-            >
-              <div className="flex flex-col text-left">
-                <span className="text-yellow-800 font-semibold text-lg">Review Pending Requests</span>
-                <span className="text-yellow-600 text-sm">Action any outstanding student requests</span>
-              </div>
-              <span className="text-yellow-600 font-bold text-xl group-hover:translate-x-1 transition-transform">→</span>
-            </button>
-
-            <button 
-              onClick={() => navigate('/overdue')}
-              className="w-full flex items-center justify-between p-4 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors group"
-            >
-              <div className="flex flex-col text-left">
-                <span className="text-red-800 font-semibold text-lg">View Overdue Items</span>
-                <span className="text-red-600 text-sm">Follow up on currently unreturned resources</span>
-              </div>
-              <span className="text-red-600 font-bold text-xl group-hover:translate-x-1 transition-transform">→</span>
-            </button>
-          </div>
+      <div className="mb-6 border-b border-gray-200 pb-4">
+        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Staff Dashboard</h1>
+        <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4">
+          <h2 className="text-xl font-semibold text-blue-900">Welcome back, {userName} 👋</h2>
+          <p className="text-blue-700 mt-1">You have <strong className="font-bold">{stats.pending}</strong> pending requests to review.</p>
         </div>
       </div>
 
-      {/* Return History Section */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-8">
-        <h3 className="text-lg font-medium text-gray-900 mb-4 border-b border-gray-100 pb-2">Return History</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-500">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-700">
-              <tr>
-                <th className="px-4 py-3 font-medium">Student</th>
-                <th className="px-4 py-3 font-medium">Resource</th>
-                <th className="px-4 py-3 font-medium">Return Date</th>
-                <th className="px-4 py-3 font-medium">Days Late</th>
-                <th className="px-4 py-3 font-medium">Penalty</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {returnedHistory.map((req) => (
-                <tr key={req._id} className="hover:bg-gray-50/50">
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-900 font-medium">{req.student?.name}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{req.resource?.name}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {req.returnDate ? new Date(req.returnDate).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">{req.daysLate || 0}</td>
-                  <td className="px-4 py-3 whitespace-nowrap font-medium">
-                    {req.penaltyAmount > 0 ? (
-                      <span className="text-red-600">⚠️ LKR {req.penaltyAmount}</span>
-                    ) : (
-                      <span className="text-green-600">No penalty</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {returnedHistory.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="px-4 py-6 text-center text-gray-400">
-                    No returned items history found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* Key Metrics Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <StatsCard title="All Requests" value={stats.total} color="default" icon="📋" />
+        <StatsCard title="Pending" value={stats.pending} color="yellow" icon="🕐" />
+        <StatsCard title="Approved" value={stats.approved} color="green" icon="✅" />
+        <StatsCard title="Rejected" value={stats.rejected} color="red" icon="❌" />
+        <StatsCard title="Returned" value={stats.returned} color="blue" icon="🔄" />
+        <StatsCard title="Overdue" value={stats.overdue} color="darkRed" icon="⚠️" />
+      </div>
+
+      {/* Main Content Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="h-[450px]">
+          <RecentRequests requests={allRequests} />
+        </div>
+        <div className="h-[450px]">
+          <OverdueSection overdueRequests={overdueRequests} />
         </div>
       </div>
     </div>
