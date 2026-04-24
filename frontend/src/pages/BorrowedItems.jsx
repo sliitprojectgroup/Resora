@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getBorrowedItems, returnResource } from '../services/api.js';
 import Pagination from '../components/Pagination';
+import SortHeader from '../components/SortHeader';
 
 export default function BorrowedItems() {
   const [borrowedItems, setBorrowedItems] = useState([]);
@@ -14,6 +15,8 @@ export default function BorrowedItems() {
   const [conditionNotes, setConditionNotes] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
   const itemsPerPage = 5;
 
   const fetchItems = async () => {
@@ -84,10 +87,39 @@ export default function BorrowedItems() {
     );
   });
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue, bValue;
+    if (sortField === 'student.name') {
+      aValue = a.student?.name?.toLowerCase() || '';
+      bValue = b.student?.name?.toLowerCase() || '';
+    } else if (sortField === 'resource.name') {
+      aValue = a.resource?.name?.toLowerCase() || '';
+      bValue = b.resource?.name?.toLowerCase() || '';
+    } else if (sortField === 'dueDate') {
+      aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+    }
+
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
   const start = (currentPage - 1) * itemsPerPage;
-  const paginatedItems = filteredItems.slice(start, start + itemsPerPage);
+  const paginatedItems = sortedItems.slice(start, start + itemsPerPage);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -110,9 +142,9 @@ export default function BorrowedItems() {
         <table className="w-full text-left text-sm text-gray-500">
           <thead className="bg-gray-50 text-xs uppercase text-gray-700">
             <tr>
-              <th className="px-4 py-3 font-medium">Student</th>
-              <th className="px-4 py-3 font-medium">Resource</th>
-              <th className="px-4 py-3 font-medium">Due Date</th>
+              <SortHeader label="Student" field="student.name" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+              <SortHeader label="Resource" field="resource.name" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+              <SortHeader label="Due Date" field="dueDate" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
               <th className="px-4 py-3 font-medium">Overdue Penalty</th>
               <th className="px-4 py-3 font-medium text-center">QR Code</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
