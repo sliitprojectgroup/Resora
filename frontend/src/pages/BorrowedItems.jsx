@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { getBorrowedItems, returnResource } from '../services/api.js';
+import Pagination from '../components/Pagination';
 
 export default function BorrowedItems() {
   const [borrowedItems, setBorrowedItems] = useState([]);
@@ -11,6 +12,9 @@ export default function BorrowedItems() {
   const [selectedReturnId, setSelectedReturnId] = useState('');
   const [condition, setCondition] = useState('GOOD');
   const [conditionNotes, setConditionNotes] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchItems = async () => {
     setLoading(true);
@@ -28,6 +32,11 @@ export default function BorrowedItems() {
   useEffect(() => {
     fetchItems();
   }, []);
+
+  // Reset to first page when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const openConditionModal = (id) => {
     setSelectedReturnId(id);
@@ -66,11 +75,19 @@ export default function BorrowedItems() {
     return <div className="text-gray-500 font-medium p-6">Loading...</div>;
   }
 
-  const filteredItems = borrowedItems.filter(item => 
-    item.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.resource?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems = borrowedItems.filter(item => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      item.student?.name?.toLowerCase()?.includes(searchLower) || 
+      item.student?.studentId?.toLowerCase()?.includes(searchLower) ||
+      item.resource?.name?.toLowerCase()?.includes(searchLower)
+    );
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const start = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = filteredItems.slice(start, start + itemsPerPage);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -102,14 +119,14 @@ export default function BorrowedItems() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filteredItems.length === 0 ? (
+            {paginatedItems.length === 0 ? (
               <tr>
                 <td colSpan="6" className="px-4 py-8 text-center text-gray-400 font-medium">
                   No borrowed items matched your search.
                 </td>
               </tr>
             ) : (
-              filteredItems.map((item) => {
+              paginatedItems.map((item) => {
                 const now = new Date();
                 const isOverdue = item.dueDate && now > new Date(item.dueDate);
                 const daysLate = isOverdue
@@ -184,6 +201,12 @@ export default function BorrowedItems() {
             )}
           </tbody>
         </table>
+        
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {showConditionModal && (
