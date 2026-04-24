@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getOverdueRequests, returnResource } from '../services/api.js';
+import Pagination from '../components/Pagination';
 
 export default function OverdueList() {
   const [overdueItems, setOverdueItems] = useState([]);
@@ -10,6 +11,9 @@ export default function OverdueList() {
   const [selectedReturnId, setSelectedReturnId] = useState('');
   const [condition, setCondition] = useState('GOOD');
   const [conditionNotes, setConditionNotes] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchOverdue = async () => {
     setLoading(true);
@@ -61,11 +65,24 @@ export default function OverdueList() {
     }
   };
 
-  const filteredItems = overdueItems.filter(item => 
-    item.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    item.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.resource?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems = overdueItems.filter(item => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      item.student?.name?.toLowerCase()?.includes(searchLower) || 
+      item.student?.studentId?.toLowerCase()?.includes(searchLower) ||
+      item.resource?.name?.toLowerCase()?.includes(searchLower)
+    );
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const start = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = filteredItems.slice(start, start + itemsPerPage);
+
+  // Reset to first page when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
@@ -99,7 +116,7 @@ export default function OverdueList() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredItems.map((item) => {
+              {paginatedItems.map((item) => {
                 const daysLate = Math.floor((new Date() - new Date(item.dueDate)) / (1000 * 60 * 60 * 24));
                 const penalty = daysLate * 50;
                 return (
@@ -135,7 +152,7 @@ export default function OverdueList() {
                   </tr>
                 );
               })}
-              {filteredItems.length === 0 && (
+              {paginatedItems.length === 0 && (
                 <tr>
                   <td colSpan="6" className="px-6 py-8 text-center text-gray-400">
                     No overdue items matched your search.
@@ -144,6 +161,12 @@ export default function OverdueList() {
               )}
             </tbody>
           </table>
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 

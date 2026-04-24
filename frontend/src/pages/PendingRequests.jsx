@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getPendingRequests, approveRequest, rejectRequest } from '../services/api.js';
+import Pagination from '../components/Pagination';
 
 export default function PendingRequests() {
   const [requests, setRequests] = useState([]);
@@ -10,6 +11,9 @@ export default function PendingRequests() {
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -63,11 +67,24 @@ export default function PendingRequests() {
     }
   };
 
-  const filteredRequests = requests.filter(req => 
-    req.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    req.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    req.resource?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredRequests = requests.filter(req => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      req.student?.name?.toLowerCase()?.includes(searchLower) || 
+      req.student?.studentId?.toLowerCase()?.includes(searchLower) ||
+      req.resource?.name?.toLowerCase()?.includes(searchLower)
+    );
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const start = (currentPage - 1) * itemsPerPage;
+  const paginatedRequests = filteredRequests.slice(start, start + itemsPerPage);
+
+  // Reset to first page when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
@@ -99,7 +116,7 @@ export default function PendingRequests() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredRequests.map((req) => (
+              {paginatedRequests.map((req) => (
                 <tr key={req._id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">
                     {req.student?.name}
@@ -127,7 +144,7 @@ export default function PendingRequests() {
                   </td>
                 </tr>
               ))}
-              {filteredRequests.length === 0 && (
+              {paginatedRequests.length === 0 && (
                 <tr>
                   <td colSpan="4" className="px-6 py-8 text-center text-gray-400">
                     No pending requests matched your search.
@@ -136,6 +153,12 @@ export default function PendingRequests() {
               )}
             </tbody>
           </table>
+          
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 
