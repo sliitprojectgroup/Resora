@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPendingRequests, approveRequest, rejectRequest } from '../services/api.js';
 import Pagination from '../components/Pagination';
+import SortHeader from '../components/SortHeader';
 
 export default function PendingRequests() {
   const [requests, setRequests] = useState([]);
@@ -13,6 +14,8 @@ export default function PendingRequests() {
   const [rejectionReason, setRejectionReason] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
   const itemsPerPage = 5;
 
   const fetchRequests = async () => {
@@ -76,10 +79,39 @@ export default function PendingRequests() {
     );
   });
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedRequests = [...filteredRequests].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue, bValue;
+    if (sortField === 'student.name') {
+      aValue = a.student?.name?.toLowerCase() || '';
+      bValue = b.student?.name?.toLowerCase() || '';
+    } else if (sortField === 'resource.name') {
+      aValue = a.resource?.name?.toLowerCase() || '';
+      bValue = b.resource?.name?.toLowerCase() || '';
+    } else if (sortField === 'dueDate') {
+      aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+    }
+
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedRequests.length / itemsPerPage);
   const start = (currentPage - 1) * itemsPerPage;
-  const paginatedRequests = filteredRequests.slice(start, start + itemsPerPage);
+  const paginatedRequests = sortedRequests.slice(start, start + itemsPerPage);
 
   // Reset to first page when searching
   useEffect(() => {
@@ -109,9 +141,9 @@ export default function PendingRequests() {
           <table className="w-full text-left text-sm text-gray-500">
             <thead className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-700">
               <tr>
-                <th className="px-6 py-3 font-medium">Student</th>
-                <th className="px-6 py-3 font-medium">Resource</th>
-                <th className="px-6 py-3 font-medium">Due Date</th>
+                <SortHeader label="Student" field="student.name" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+                <SortHeader label="Resource" field="resource.name" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+                <SortHeader label="Due Date" field="dueDate" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>

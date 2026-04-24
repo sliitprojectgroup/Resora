@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getOverdueRequests, returnResource } from '../services/api.js';
 import Pagination from '../components/Pagination';
+import SortHeader from '../components/SortHeader';
 
 export default function OverdueList() {
   const [overdueItems, setOverdueItems] = useState([]);
@@ -13,6 +14,8 @@ export default function OverdueList() {
   const [conditionNotes, setConditionNotes] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('');
+  const [sortOrder, setSortOrder] = useState('asc');
   const itemsPerPage = 5;
 
   const fetchOverdue = async () => {
@@ -74,10 +77,42 @@ export default function OverdueList() {
     );
   });
 
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue, bValue;
+    if (sortField === 'dueDate' || sortField === 'daysLate' || sortField === 'penalty') {
+      aValue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      bValue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      
+      // If sorting by daysLate or penalty, older date means MORE days late (higher value)
+      // So we invert the comparison to match standard logic (asc = smaller penalty first)
+      if (sortField === 'daysLate' || sortField === 'penalty') {
+        // Swap values to reverse the order logically, because a smaller timestamp = larger penalty
+        const temp = aValue;
+        aValue = bValue;
+        bValue = temp;
+      }
+    }
+
+    if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedItems.length / itemsPerPage);
   const start = (currentPage - 1) * itemsPerPage;
-  const paginatedItems = filteredItems.slice(start, start + itemsPerPage);
+  const paginatedItems = sortedItems.slice(start, start + itemsPerPage);
 
   // Reset to first page when searching
   useEffect(() => {
@@ -109,9 +144,9 @@ export default function OverdueList() {
               <tr>
                 <th className="px-6 py-3 font-medium">Student</th>
                 <th className="px-6 py-3 font-medium">Resource</th>
-                <th className="px-6 py-3 font-medium">Due Date</th>
-                <th className="px-6 py-3 font-medium">Days Late</th>
-                <th className="px-6 py-3 font-medium">Penalty (LKR)</th>
+                <SortHeader label="Due Date" field="dueDate" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+                <SortHeader label="Days Late" field="daysLate" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
+                <SortHeader label="Penalty (LKR)" field="penalty" sortField={sortField} sortOrder={sortOrder} onSort={handleSort} />
                 <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
