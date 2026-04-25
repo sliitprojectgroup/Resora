@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getOverdueRequests, returnResource } from '../services/api.js';
 import Pagination from '../components/Pagination';
 import SortHeader from '../components/SortHeader';
+import toast from 'react-hot-toast';
 
 export default function OverdueList() {
   const [overdueItems, setOverdueItems] = useState([]);
@@ -25,7 +26,9 @@ export default function OverdueList() {
       const response = await getOverdueRequests();
       setOverdueItems(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch overdue requests');
+      const msg = err.response?.data?.message || 'Failed to fetch overdue requests';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -48,23 +51,25 @@ export default function OverdueList() {
   };
 
   const handleReturn = async () => {
+    const toastId = toast.loading("Processing return...");
     try {
       const response = await returnResource(selectedReturnId, condition, conditionNotes);
       const { daysLate, penaltyAmount } = response.data;
       
-      let message = `Device Condition: ${condition}\n`;
-      if (conditionNotes) message += `Notes: ${conditionNotes}\n`;
       if (penaltyAmount > 0) {
-        message += `⚠️ Returned late!\nDays late: ${daysLate}\nPenalty: LKR ${penaltyAmount}`;
+        toast(`Returned with penalty applied\nDays late: ${daysLate} | Penalty: LKR ${penaltyAmount}`, { 
+          icon: "⚠️",
+          id: toastId,
+          duration: 4000
+        });
       } else {
-        message += '✅ Returned on time. No penalty.';
+        toast.success("Resource returned successfully", { id: toastId });
       }
-      alert(message);
       
       closeConditionModal();
       await fetchOverdue();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to return resource');
+      toast.error(err.response?.data?.message || 'Return failed', { id: toastId });
     }
   };
 

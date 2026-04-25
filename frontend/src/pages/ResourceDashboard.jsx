@@ -3,6 +3,7 @@ import { getResources, deleteResource } from '../services/api';
 import AddResourceForm from '../components/AddResourceForm';
 import EditResource from '../components/EditResource';
 import StatusBadge from '../components/StatusBadge';
+import toast from 'react-hot-toast';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80';
 
@@ -40,7 +41,7 @@ export default function ResourceDashboard() {
       await deleteResource(id);
       fetchResources();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete resource');
+      toast.error(err.response?.data?.message || 'Failed to delete resource');
     }
   };
 

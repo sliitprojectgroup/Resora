@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { getResources, getAllRequests } from '../services/api';
 import Card from '../components/Card';
 import Button from '../components/Button';
@@ -55,7 +56,7 @@ export default function StudentDashboard() {
     setShowModal(false);
     setSelectedResource(null);
     fetchData();
-    alert('Request submitted successfully!');
+    toast.success('Request submitted successfully!');
   };
 
   const handleCancel = () => {

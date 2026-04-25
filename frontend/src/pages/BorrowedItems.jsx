@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { getBorrowedItems, returnResource } from '../services/api.js';
 import Pagination from '../components/Pagination';
 import SortHeader from '../components/SortHeader';
+import toast from 'react-hot-toast';
 
 export default function BorrowedItems() {
   const [borrowedItems, setBorrowedItems] = useState([]);
@@ -24,9 +25,10 @@ export default function BorrowedItems() {
     try {
       const response = await getBorrowedItems();
       setBorrowedItems(response.data);
-      setError(null);
     } catch (err) {
+      console.error(err);
       setError('Failed to fetch borrowed items.');
+      toast.error('Failed to fetch borrowed items.');
     } finally {
       setLoading(false);
     }
@@ -54,23 +56,25 @@ export default function BorrowedItems() {
   };
 
   const handleReturn = async () => {
+    const toastId = toast.loading("Processing return...");
     try {
       const response = await returnResource(selectedReturnId, condition, conditionNotes);
       const { daysLate, penaltyAmount } = response.data;
       
-      let message = `Device Condition: ${condition}\n`;
-      if (conditionNotes) message += `Notes: ${conditionNotes}\n`;
       if (penaltyAmount > 0) {
-        message += `⚠️ Returned late!\nDays late: ${daysLate}\nPenalty: LKR ${penaltyAmount}`;
+        toast(`Returned with penalty applied\nDays late: ${daysLate} | Penalty: LKR ${penaltyAmount}`, { 
+          icon: "⚠️",
+          id: toastId,
+          duration: 4000
+        });
       } else {
-        message += '✅ Returned on time. No penalty.';
+        toast.success("Resource returned successfully", { id: toastId });
       }
-      alert(message);
       
       closeConditionModal();
       await fetchItems();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to return resource');
+      toast.error(err.response?.data?.message || 'Return failed', { id: toastId });
     }
   };
 

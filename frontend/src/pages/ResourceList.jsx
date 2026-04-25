@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getResources } from '../services/api';
 import RequestForm from '../components/RequestForm';
 import StatusBadge from '../components/StatusBadge';
+import toast from 'react-hot-toast';
 
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/80';
 
@@ -39,7 +40,7 @@ export default function ResourceList() {
     setShowModal(false);
     setSelectedResource(null);
     fetchResources(); // Refresh list to update status
-    alert('Request submitted successfully!');
+    toast.success('Request submitted successfully!');
   };
 
   const handleCancel = () => {
