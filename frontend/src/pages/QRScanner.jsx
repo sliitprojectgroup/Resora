@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { returnResource, getRequestById } from '../services/api.js';
+import toast from 'react-hot-toast';
 
 export default function QRScanner() {
   const [result, setResult] = useState(null);
@@ -12,7 +13,6 @@ export default function QRScanner() {
   const [scannedRequest, setScannedRequest] = useState(null);  // full request data
   const [condition, setCondition] = useState('GOOD');
   const [conditionNotes, setConditionNotes] = useState('');
-  const [scanResult, setScanResult] = useState('');
   
   const scannerRef = useRef(null);
 
@@ -51,7 +51,6 @@ export default function QRScanner() {
           }
           
           setScannedRequestId(decodedText);
-          setScanResult(`QR Scanned! Request ID: ${decodedText}`);
 
           // Fetch full request to check overdue status
           getRequestById(decodedText)
@@ -60,13 +59,14 @@ export default function QRScanner() {
             })
             .catch(() => {
               setScannedRequest(null);
+              toast.error("Failed to fetch request details for the scanned QR code");
             })
             .finally(() => {
               setShowConditionModal(true);
               setIsProcessing(false);
             });
         },
-        (errorMessage) => {
+        () => {
           // Ignore routine background scanning framework warnings
         }
       ).catch((err) => {
@@ -85,29 +85,29 @@ export default function QRScanner() {
   }, [isCameraActive]);
 
   const handleConfirmReturn = async () => {
+    const toastId = toast.loading("Processing return...");
     try {
       const response = await returnResource(scannedRequestId, condition, conditionNotes);
       const { daysLate, penaltyAmount } = response.data;
       
-      let message = `✅ Return Confirmed!\n`;
-      message += `Device Condition: ${condition}\n`;
-      if (conditionNotes) message += `Notes: ${conditionNotes}\n`;
       if (penaltyAmount > 0) {
-        message += `⚠️ Returned late!\nDays late: ${daysLate}\nPenalty: LKR ${penaltyAmount}`;
+        toast(`Returned with penalty applied\nDays late: ${daysLate} | Penalty: LKR ${penaltyAmount}`, { 
+          icon: "⚠️",
+          id: toastId,
+          duration: 4000
+        });
       } else {
-        message += `No penalty — returned on time.`;
+        toast.success("Resource returned successfully", { id: toastId });
       }
-      alert(message);
       
       setShowConditionModal(false);
       setScannedRequestId('');
       setScannedRequest(null);
       setCondition('GOOD');
       setConditionNotes('');
-      setScanResult('Scan another QR code...');
       await stopScanner();
     } catch (err) {
-      alert(err.response?.data?.message || 'Return failed — invalid QR code');
+      toast.error(err.response?.data?.message || 'Return failed — invalid QR code', { id: toastId });
       setShowConditionModal(false);
       if (scannerRef.current && scannerRef.current.getState() === 3) { // 3 = PAUSED
         scannerRef.current.resume();
@@ -265,7 +265,6 @@ export default function QRScanner() {
                     setScannedRequest(null);
                     setCondition('GOOD');
                     setConditionNotes('');
-                    setScanResult('');
                     if (scannerRef.current && scannerRef.current.getState() === 3) {
                       scannerRef.current.resume();
                     }

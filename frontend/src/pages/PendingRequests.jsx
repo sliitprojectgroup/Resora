@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPendingRequests, approveRequest, rejectRequest } from '../services/api.js';
 import Pagination from '../components/Pagination';
 import SortHeader from '../components/SortHeader';
+import toast from 'react-hot-toast';
 
 export default function PendingRequests() {
   const [requests, setRequests] = useState([]);
@@ -36,11 +37,13 @@ export default function PendingRequests() {
   }, []);
 
   const handleApprove = async (id) => {
+    const toastId = toast.loading("Processing approval...");
     try {
       await approveRequest(id);
+      toast.success("Request approved successfully", { id: toastId });
       await fetchRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to approve request');
+      toast.error(err.response?.data?.message || 'Failed to approve request', { id: toastId });
     }
   };
 
@@ -57,16 +60,18 @@ export default function PendingRequests() {
 
   const confirmReject = async () => {
     if (!rejectionReason.trim()) {
-      alert('Rejection reason cannot be empty');
+      toast.error('Please provide a rejection reason');
       return;
     }
     
+    const toastId = toast.loading("Processing rejection...");
     try {
       await rejectRequest(selectedId, rejectionReason);
+      toast.success("Request rejected", { id: toastId });
       await fetchRequests();
       closeRejectModal();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to reject request');
+      toast.error(err.response?.data?.message || 'Reject action failed', { id: toastId });
     }
   };
 

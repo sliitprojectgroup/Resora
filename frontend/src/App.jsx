@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import AdminLayout from './layouts/AdminLayout';
 import StudentLayout from './layouts/StudentLayout';
 import Home from './pages/Home';
@@ -29,6 +30,7 @@ function ProtectedRoute({ allowedRoles, children }) {
 export default function App() {
   return (
     <Router>
+      <Toaster position="bottom-right" />
       <Routes>
         {/* Public Landing Page */}
         <Route path="/" element={<Home />} />
