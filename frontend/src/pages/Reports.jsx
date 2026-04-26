@@ -270,6 +270,53 @@ export default function Reports() {
               <p className="text-xs text-gray-500 mt-2">Currently in use</p>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-800 px-6 py-4">
+              <h3 className="text-lg font-semibold text-white">Resource Inventory Details</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100 border-b-2 border-gray-300">
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Resource Name</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Category</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-3 text-center font-semibold text-gray-700">Quantity</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Description</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {resources.length > 0 ? (
+                    resources.map((resource, idx) => (
+                      <tr key={resource._id} className={idx % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-gray-50 hover:bg-blue-50'} >
+                        <td className="px-6 py-4 font-medium text-gray-800">{resource.name}</td>
+                        <td className="px-6 py-4 text-gray-600">{resource.category || '-'}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            resource.status === 'AVAILABLE' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {resource.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-800 font-semibold">{resource.quantity || 1}</td>
+                        <td className="px-6 py-4 text-gray-600">{resource.description || '-'}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                        No resources found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Resource Distribution Chart</h3>
             <div className="h-80">
@@ -348,6 +395,54 @@ export default function Reports() {
               <p className="text-xs text-gray-500 mt-2">Denied requests</p>
             </div>
           </div>
+
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-800 px-6 py-4">
+              <h3 className="text-lg font-semibold text-white">Borrow Request Details</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-100 border-b-2 border-gray-300">
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Student Name</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Resource</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Status</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Request Date</th>
+                    <th className="px-6 py-3 text-left font-semibold text-gray-700">Due Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredRequests.length > 0 ? (
+                    filteredRequests.map((request, idx) => (
+                      <tr key={request._id} className={idx % 2 === 0 ? 'bg-white hover:bg-purple-50' : 'bg-gray-50 hover:bg-purple-50'}>
+                        <td className="px-6 py-4 font-medium text-gray-800">{getStudentName(request)}</td>
+                        <td className="px-6 py-4 text-gray-600">{getResourceName(request)}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            request.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
+                            request.status === 'APPROVED' ? 'bg-blue-100 text-blue-800' :
+                            request.status === 'RETURNED' ? 'bg-emerald-100 text-emerald-800' :
+                            'bg-rose-100 text-rose-800'
+                          }`}>
+                            {request.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{formatDate(request.createdAt)}</td>
+                        <td className="px-6 py-4 text-gray-600">{formatDate(request.dueDate)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                        No borrow requests found for the selected date range
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Request Status Distribution Chart</h3>
             <div className="h-80">
@@ -359,29 +454,57 @@ export default function Reports() {
     }
 
     return (
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="px-4 py-3 font-medium text-gray-700">Student</th>
-              <th className="px-4 py-3 font-medium text-gray-700">Resource</th>
-              <th className="px-4 py-3 font-medium text-gray-700">Due Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filteredOverdue.map((request) => (
-              <tr key={request._id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">{getStudentName(request)}</td>
-                <td className="px-4 py-3">{getResourceName(request)}</td>
-                <td className="px-4 py-3">{formatDate(request.dueDate)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {filteredOverdue.length === 0 && (
-          <p className="text-sm text-gray-500 mt-4">No overdue requests found for the selected date range.</p>
-        )}
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-gradient-to-r from-red-600 to-red-800 px-6 py-4">
+            <h3 className="text-lg font-semibold text-white">Overdue Items Details</h3>
+            <p className="text-red-100 text-sm mt-1">Items that are past their due date</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-100 border-b-2 border-gray-300">
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Student Name</th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Resource</th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Due Date</th>
+                  <th className="px-6 py-3 text-left font-semibold text-gray-700">Days Overdue</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredOverdue.length > 0 ? (
+                  filteredOverdue.map((request, idx) => {
+                    const dueDate = new Date(request.dueDate);
+                    const today = new Date();
+                    const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+                    
+                    return (
+                      <tr key={request._id} className={idx % 2 === 0 ? 'bg-white hover:bg-red-50' : 'bg-gray-50 hover:bg-red-50'}>
+                        <td className="px-6 py-4 font-medium text-gray-800">{getStudentName(request)}</td>
+                        <td className="px-6 py-4 text-gray-600">{getResourceName(request)}</td>
+                        <td className="px-6 py-4 text-gray-600">{formatDate(request.dueDate)}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            daysOverdue > 30 ? 'bg-red-100 text-red-800' :
+                            daysOverdue > 14 ? 'bg-orange-100 text-orange-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {daysOverdue} days
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                      No overdue requests found for the selected date range
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
   };
