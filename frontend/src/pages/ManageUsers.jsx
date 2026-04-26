@@ -104,10 +104,10 @@ export default function ManageUsers() {
     return 'bg-blue-100 text-blue-800 border border-blue-300';
   };
 
-  const getRoleIcon = (role) => {
-    if (role === 'admin') return '👨‍💼';
-    if (role === 'staff') return '👤';
-    return '🎓';
+  const getRoleName = (role) => {
+    if (role === 'admin') return 'Admin';
+    if (role === 'staff') return 'Staff';
+    return 'Student';
   };
 
   // Filter and search users
@@ -139,64 +139,69 @@ export default function ManageUsers() {
 
       {/* Alert Messages */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg flex items-start">
-          <span className="text-2xl mr-3">❌</span>
-          <div>
-            <p className="font-semibold text-red-900">Error</p>
-            <p className="text-red-700">{error}</p>
-          </div>
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+          <p className="font-semibold text-red-900">Error</p>
+          <p className="text-red-700 text-sm mt-1">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg flex items-start">
-          <span className="text-2xl mr-3">✅</span>
-          <div>
-            <p className="font-semibold text-green-900">Success</p>
-            <p className="text-green-700">{success}</p>
-          </div>
+        <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
+          <p className="font-semibold text-green-900">Success</p>
+          <p className="text-green-700 text-sm mt-1">{success}</p>
         </div>
       )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium">Total Users</p>
+              <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Total Users</p>
               <p className="text-4xl font-bold text-blue-600 mt-2">{stats.total}</p>
             </div>
-            <span className="text-5xl text-blue-200">👥</span>
+            <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 border-2 border-blue-400 rounded-full"></div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-emerald-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-emerald-500 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium">Staff Members</p>
+              <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Staff Members</p>
               <p className="text-4xl font-bold text-emerald-600 mt-2">{stats.staff}</p>
             </div>
-            <span className="text-5xl text-emerald-200">👤</span>
+            <div className="w-14 h-14 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <div className="w-6 h-8 border-2 border-emerald-400 rounded-sm"></div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium">Students</p>
+              <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Students</p>
               <p className="text-4xl font-bold text-indigo-600 mt-2">{stats.students}</p>
             </div>
-            <span className="text-5xl text-indigo-200">🎓</span>
+            <div className="w-14 h-14 bg-indigo-100 rounded-lg flex items-center justify-center">
+              <div className="flex gap-1">
+                <div className="w-1.5 h-6 bg-indigo-400 rounded-sm"></div>
+                <div className="w-1.5 h-6 bg-indigo-400 rounded-sm"></div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-gray-600 text-sm font-medium">Administrators</p>
+              <p className="text-gray-600 text-sm font-semibold uppercase tracking-wide">Administrators</p>
               <p className="text-4xl font-bold text-red-600 mt-2">{stats.admin}</p>
             </div>
-            <span className="text-5xl text-red-200">👨‍💼</span>
+            <div className="w-14 h-14 bg-red-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 border-3 border-red-400 rounded-full"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -223,7 +228,7 @@ export default function ManageUsers() {
                   formErrors.fullName ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
               />
-              {formErrors.fullName && <p className="text-red-600 text-sm mt-1">🔴 {formErrors.fullName}</p>}
+              {formErrors.fullName && <p className="text-red-600 text-sm mt-1">{formErrors.fullName}</p>}
             </div>
 
             {/* Email */}
@@ -239,7 +244,7 @@ export default function ManageUsers() {
                   formErrors.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
               />
-              {formErrors.email && <p className="text-red-600 text-sm mt-1">🔴 {formErrors.email}</p>}
+              {formErrors.email && <p className="text-red-600 text-sm mt-1">{formErrors.email}</p>}
             </div>
 
             {/* Password */}
@@ -255,7 +260,7 @@ export default function ManageUsers() {
                   formErrors.password ? 'border-red-500 bg-red-50' : 'border-gray-300'
                 }`}
               />
-              {formErrors.password && <p className="text-red-600 text-sm mt-1">🔴 {formErrors.password}</p>}
+              {formErrors.password && <p className="text-red-600 text-sm mt-1">{formErrors.password}</p>}
             </div>
 
             {/* Role */}
@@ -267,8 +272,8 @@ export default function ManageUsers() {
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               >
-                <option value="student">🎓 Student</option>
-                <option value="staff">👤 Staff</option>
+                <option value="student">Student</option>
+                <option value="staff">Staff</option>
               </select>
             </div>
           </div>
@@ -278,7 +283,7 @@ export default function ManageUsers() {
             disabled={loading}
             className="mt-6 w-full md:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-semibold disabled:from-blue-400 disabled:to-blue-500 shadow-md hover:shadow-lg"
           >
-            {loading ? '⏳ Adding User...' : '➕ Add User'}
+            {loading ? 'Adding User...' : 'Add User'}
           </button>
         </div>
       </div>
@@ -311,9 +316,9 @@ export default function ManageUsers() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Roles</option>
-                <option value="student">🎓 Student</option>
-                <option value="staff">👤 Staff</option>
-                <option value="admin">👨‍💼 Admin</option>
+                <option value="student">Student</option>
+                <option value="staff">Staff</option>
+                <option value="admin">Admin</option>
               </select>
             </div>
           </div>
@@ -347,8 +352,8 @@ export default function ManageUsers() {
                     </td>
                     <td className="px-6 py-4 text-gray-700">{user.email}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${getRoleBadgeColor(user.role)}`}>
-                        {getRoleIcon(user.role)} {user.role.toUpperCase()}
+                      <span className={`px-3 py-1 rounded text-xs font-bold ${getRoleBadgeColor(user.role)}`}>
+                        {getRoleName(user.role)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -357,7 +362,7 @@ export default function ManageUsers() {
                           onClick={() => handleDeactivate(user)}
                           className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-semibold transition-colors text-sm"
                         >
-                          🚫 Deactivate
+                          Deactivate
                         </button>
                       )}
                       {user.role === 'admin' && (
@@ -369,7 +374,7 @@ export default function ManageUsers() {
               ) : (
                 <tr>
                   <td colSpan="4" className="px-6 py-12 text-center">
-                    <p className="text-gray-500 text-lg">🔍 No users found matching your search criteria</p>
+                    <p className="text-gray-500 text-lg">No users found matching your search criteria</p>
                   </td>
                 </tr>
               )}
