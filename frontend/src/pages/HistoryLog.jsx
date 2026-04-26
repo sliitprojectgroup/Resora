@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { getAllRequests } from '../services/api.js';
+import Pagination from '../components/Pagination';
 
 export default function HistoryLog() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  const handleViewAll = () => {
+    setItemsPerPage(itemsPerPage === 5 ? 9999 : 5);
+    setCurrentPage(1);
+  };
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -26,6 +35,11 @@ export default function HistoryLog() {
     fetchHistory();
   }, []);
 
+  // Reset to first page when searching
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const filteredHistory = history.filter(item => 
     item.student?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     item.student?.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -33,6 +47,11 @@ export default function HistoryLog() {
     item.status?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.rejectionReason?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredHistory.length / itemsPerPage);
+  const start = (currentPage - 1) * itemsPerPage;
+  const paginatedHistory = filteredHistory.slice(start, start + itemsPerPage);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -75,14 +94,14 @@ export default function HistoryLog() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {filteredHistory.length === 0 ? (
+            {paginatedHistory.length === 0 ? (
               <tr>
                 <td colSpan="5" className="px-4 py-8 text-center text-gray-400 font-medium">
                   No system activity matches your search.
                 </td>
               </tr>
             ) : (
-              filteredHistory.map((item) => (
+              paginatedHistory.map((item) => (
                 <tr key={item._id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-4 whitespace-nowrap">
                     {new Date(item.updatedAt).toLocaleDateString()}{' '}
@@ -125,6 +144,14 @@ export default function HistoryLog() {
             )}
           </tbody>
         </table>
+        
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          onViewAll={handleViewAll}
+          isViewingAll={itemsPerPage > 5}
+        />
       </div>
     </div>
   );

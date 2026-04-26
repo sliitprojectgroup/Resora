@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Pagination({ currentPage, totalPages, onPageChange }) {
+export default function Pagination({ currentPage, totalPages, onPageChange, onViewAll, isViewingAll }) {
   // Always render to show controls even on single pages
 
   const safeTotalPages = Math.max(1, totalPages);
@@ -55,6 +55,15 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       >
         Next
       </button>
+
+      {onViewAll && (
+        <button
+          onClick={onViewAll}
+          className="ml-4 px-3 py-1 rounded-md text-sm font-medium transition-colors bg-white text-blue-600 border border-blue-300 hover:bg-blue-50"
+        >
+          {isViewingAll ? 'View Less' : 'View All'}
+        </button>
+      )}
     </div>
   );
 }

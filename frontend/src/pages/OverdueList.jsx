@@ -17,7 +17,12 @@ export default function OverdueList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  const handleViewAll = () => {
+    setItemsPerPage(itemsPerPage === 5 ? 9999 : 5);
+    setCurrentPage(1);
+  };
 
   const fetchOverdue = async () => {
     setLoading(true);
@@ -206,6 +211,8 @@ export default function OverdueList() {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
+            onViewAll={handleViewAll}
+            isViewingAll={itemsPerPage > 5}
           />
         </div>
       )}
