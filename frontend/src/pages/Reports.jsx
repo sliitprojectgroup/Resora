@@ -253,23 +253,27 @@ export default function Reports() {
 
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg">
-            <div className="h-96">
-              <Bar data={resourceChartData} options={chartOptions} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Total Resources</p>
+              <p className="text-4xl font-bold text-blue-700 mt-2">{resourceSummary.total}</p>
+              <p className="text-xs text-gray-500 mt-2">Complete resource inventory</p>
+            </div>
+            <div className="bg-green-50 p-6 rounded-lg border-l-4 border-green-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Available</p>
+              <p className="text-4xl font-bold text-green-700 mt-2">{resourceSummary.available}</p>
+              <p className="text-xs text-gray-500 mt-2">Ready for borrowing</p>
+            </div>
+            <div className="bg-amber-50 p-6 rounded-lg border-l-4 border-amber-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Borrowed</p>
+              <p className="text-4xl font-bold text-amber-700 mt-2">{resourceSummary.borrowed}</p>
+              <p className="text-xs text-gray-500 mt-2">Currently in use</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-              <p className="text-sm text-gray-600">Total Resources</p>
-              <p className="text-3xl font-bold text-blue-700">{resourceSummary.total}</p>
-            </div>
-            <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
-              <p className="text-sm text-gray-600">Available</p>
-              <p className="text-3xl font-bold text-green-700">{resourceSummary.available}</p>
-            </div>
-            <div className="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500">
-              <p className="text-sm text-gray-600">Borrowed</p>
-              <p className="text-3xl font-bold text-amber-700">{resourceSummary.borrowed}</p>
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Resource Distribution Chart</h3>
+            <div className="h-80">
+              <Bar data={resourceChartData} options={chartOptions} />
             </div>
           </div>
         </div>
@@ -317,31 +321,37 @@ export default function Reports() {
 
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
-            <div className="h-96">
-              <Bar data={borrowChartData} options={chartOptions} />
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="bg-slate-50 p-6 rounded-lg border-l-4 border-slate-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Total</p>
+              <p className="text-4xl font-bold text-slate-700 mt-2">{borrowSummary.total}</p>
+              <p className="text-xs text-gray-500 mt-2">All requests</p>
+            </div>
+            <div className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Pending</p>
+              <p className="text-4xl font-bold text-yellow-700 mt-2">{borrowSummary.pending}</p>
+              <p className="text-xs text-gray-500 mt-2">Awaiting approval</p>
+            </div>
+            <div className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Approved</p>
+              <p className="text-4xl font-bold text-blue-700 mt-2">{borrowSummary.approved}</p>
+              <p className="text-xs text-gray-500 mt-2">Granted requests</p>
+            </div>
+            <div className="bg-emerald-50 p-6 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Returned</p>
+              <p className="text-4xl font-bold text-emerald-700 mt-2">{borrowSummary.returned}</p>
+              <p className="text-xs text-gray-500 mt-2">Completed</p>
+            </div>
+            <div className="bg-rose-50 p-6 rounded-lg border-l-4 border-rose-500 shadow-sm">
+              <p className="text-sm text-gray-600 font-medium">Rejected</p>
+              <p className="text-4xl font-bold text-rose-700 mt-2">{borrowSummary.rejected}</p>
+              <p className="text-xs text-gray-500 mt-2">Denied requests</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="bg-slate-50 p-4 rounded-lg border-l-4 border-slate-500">
-              <p className="text-sm text-gray-600">Total</p>
-              <p className="text-3xl font-bold text-slate-700">{borrowSummary.total}</p>
-            </div>
-            <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
-              <p className="text-sm text-gray-600">Pending</p>
-              <p className="text-3xl font-bold text-yellow-700">{borrowSummary.pending}</p>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-              <p className="text-sm text-gray-600">Approved</p>
-              <p className="text-3xl font-bold text-blue-700">{borrowSummary.approved}</p>
-            </div>
-            <div className="bg-emerald-50 p-4 rounded-lg border-l-4 border-emerald-500">
-              <p className="text-sm text-gray-600">Returned</p>
-              <p className="text-3xl font-bold text-emerald-700">{borrowSummary.returned}</p>
-            </div>
-            <div className="bg-rose-50 p-4 rounded-lg border-l-4 border-rose-500">
-              <p className="text-sm text-gray-600">Rejected</p>
-              <p className="text-3xl font-bold text-rose-700">{borrowSummary.rejected}</p>
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Request Status Distribution Chart</h3>
+            <div className="h-80">
+              <Bar data={borrowChartData} options={chartOptions} />
             </div>
           </div>
         </div>
