@@ -2,7 +2,19 @@ import { useEffect, useMemo, useState } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import { getResources, getAllRequests, getOverdueRequests } from '../services/api';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const REPORT_TYPES = [
   { value: 'resource', label: 'Resource Report' },
@@ -201,46 +213,136 @@ export default function Reports() {
 
   const renderReportContent = () => {
     if (reportType === 'resource') {
+      const resourceChartData = {
+        labels: ['Total Resources', 'Available', 'Borrowed'],
+        datasets: [
+          {
+            label: 'Resource Count',
+            data: [resourceSummary.total, resourceSummary.available, resourceSummary.borrowed],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+            borderColor: ['#1e40af', '#047857', '#d97706'],
+            borderWidth: 2,
+            borderRadius: 8,
+          },
+        ],
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Resource Distribution',
+            font: { size: 16, weight: 'bold' },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+            },
+          },
+        },
+      };
+
       return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Total Resources</p>
-            <p className="text-2xl font-bold text-blue-700">{resourceSummary.total}</p>
+        <div className="space-y-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg">
+            <div className="h-96">
+              <Bar data={resourceChartData} options={chartOptions} />
+            </div>
           </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Available</p>
-            <p className="text-2xl font-bold text-green-700">{resourceSummary.available}</p>
-          </div>
-          <div className="bg-amber-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Borrowed</p>
-            <p className="text-2xl font-bold text-amber-700">{resourceSummary.borrowed}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+              <p className="text-sm text-gray-600">Total Resources</p>
+              <p className="text-3xl font-bold text-blue-700">{resourceSummary.total}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+              <p className="text-sm text-gray-600">Available</p>
+              <p className="text-3xl font-bold text-green-700">{resourceSummary.available}</p>
+            </div>
+            <div className="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500">
+              <p className="text-sm text-gray-600">Borrowed</p>
+              <p className="text-3xl font-bold text-amber-700">{resourceSummary.borrowed}</p>
+            </div>
           </div>
         </div>
       );
     }
 
     if (reportType === 'borrow') {
+      const borrowChartData = {
+        labels: ['Pending', 'Approved', 'Returned', 'Rejected'],
+        datasets: [
+          {
+            label: 'Request Count',
+            data: [borrowSummary.pending, borrowSummary.approved, borrowSummary.returned, borrowSummary.rejected],
+            backgroundColor: ['#eab308', '#3b82f6', '#10b981', '#ef4444'],
+            borderColor: ['#ca8a04', '#1e40af', '#047857', '#b91c1c'],
+            borderWidth: 2,
+            borderRadius: 8,
+          },
+        ],
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Borrow Request Status Distribution',
+            font: { size: 16, weight: 'bold' },
+          },
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+            },
+          },
+        },
+      };
+
       return (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">Total</p>
-            <p className="text-2xl font-bold text-slate-700">{borrowSummary.total}</p>
+        <div className="space-y-6">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg">
+            <div className="h-96">
+              <Bar data={borrowChartData} options={chartOptions} />
+            </div>
           </div>
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">PENDING</p>
-            <p className="text-2xl font-bold text-yellow-700">{borrowSummary.pending}</p>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">APPROVED</p>
-            <p className="text-2xl font-bold text-blue-700">{borrowSummary.approved}</p>
-          </div>
-          <div className="bg-emerald-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">RETURNED</p>
-            <p className="text-2xl font-bold text-emerald-700">{borrowSummary.returned}</p>
-          </div>
-          <div className="bg-rose-50 p-4 rounded-lg">
-            <p className="text-sm text-gray-600">REJECTED</p>
-            <p className="text-2xl font-bold text-rose-700">{borrowSummary.rejected}</p>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="bg-slate-50 p-4 rounded-lg border-l-4 border-slate-500">
+              <p className="text-sm text-gray-600">Total</p>
+              <p className="text-3xl font-bold text-slate-700">{borrowSummary.total}</p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+              <p className="text-sm text-gray-600">Pending</p>
+              <p className="text-3xl font-bold text-yellow-700">{borrowSummary.pending}</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+              <p className="text-sm text-gray-600">Approved</p>
+              <p className="text-3xl font-bold text-blue-700">{borrowSummary.approved}</p>
+            </div>
+            <div className="bg-emerald-50 p-4 rounded-lg border-l-4 border-emerald-500">
+              <p className="text-sm text-gray-600">Returned</p>
+              <p className="text-3xl font-bold text-emerald-700">{borrowSummary.returned}</p>
+            </div>
+            <div className="bg-rose-50 p-4 rounded-lg border-l-4 border-rose-500">
+              <p className="text-sm text-gray-600">Rejected</p>
+              <p className="text-3xl font-bold text-rose-700">{borrowSummary.rejected}</p>
+            </div>
           </div>
         </div>
       );
